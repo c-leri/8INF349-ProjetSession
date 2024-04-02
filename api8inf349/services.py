@@ -108,17 +108,36 @@ def send_request(route, method="GET", data=None):
 class ProductServices(object):
     @classmethod
     def load_products(cls):
-        Product.delete().execute()
-        Order.delete().execute()
-        products = send_request("/products/")["products"]
+        products = [
+            {
+                k: v.replace("\x00", "\uFFFD") if isinstance(v, str) else v
+                for k, v in p.items()
+            }
+            for p in send_request("/products/")["products"]
+        ]
 
-        for product in products:
-            Product.create(
-                **{
-                    k: v.replace("\x00", "\uFFFD") if isinstance(v, str) else v
-                    for k, v in product.items()
-                }
-            )
+        Product.insert_many(
+            products,
+            fields=[
+                Product.id,
+                Product.name,
+                Product.description,
+                Product.price,
+                Product.weight,
+                Product.in_stock,
+                Product.image,
+            ],
+        ).on_conflict(
+            conflict_target=[Product.id],
+            preserve=[
+                Product.name,
+                Product.description,
+                Product.price,
+                Product.weight,
+                Product.in_stock,
+                Product.image,
+            ],
+        ).execute()
         print("Loaded products.")
 
 

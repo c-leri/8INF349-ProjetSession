@@ -1,6 +1,20 @@
 services:
+  api8inf349:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 5000:5000
+    environment:
+      DB_HOST: db
+      DB_USER: user
+      DB_PASSWORD: pass
+      DB_PORT: 5432
+      DB_NAME: api8inf349
   db:
-    image: postgres:12-alpine
+    image: postgres:12
     restart: always
     ports:
       - 5432:5432

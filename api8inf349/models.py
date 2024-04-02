@@ -132,12 +132,10 @@ class Order(BaseModel):
     total_price = FloatField()
     shipping_price = FloatField()
     paid = BooleanField(default=False)
-    product = ForeignKeyField(OrderProduct, on_delete="CASCADE")
-    shipping_information = ForeignKeyField(
-        OrderShippingInformation, null=True, on_delete="CASCADE"
-    )
-    credit_card = ForeignKeyField(OrderCreditCard, null=True, on_delete="CASCADE")
-    transaction = ForeignKeyField(OrderTransaction, null=True, on_delete="CASCADE")
+    product = ForeignKeyField(OrderProduct)
+    shipping_information = ForeignKeyField(OrderShippingInformation, null=True)
+    credit_card = ForeignKeyField(OrderCreditCard, null=True)
+    transaction = ForeignKeyField(OrderTransaction, null=True)
 
     @classmethod
     def create_from_order_product(cls, order_product: OrderProduct):
