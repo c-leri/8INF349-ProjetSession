@@ -1,9 +1,11 @@
+import os
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 from peewee import (
     Model,
     SqliteDatabase,
+    PostgresqlDatabase,
     Proxy,
     CharField,
     IntegerField,
@@ -17,9 +19,21 @@ db_proxy = Proxy()
 
 
 def connect_db():
-    db_proxy.initialize(
-        SqliteDatabase(current_app.config["DATABASE"], pragmas={"foreign_keys": 1})
-    )
+    if current_app.config["TESTING"]:
+        db_proxy.initialize(
+            SqliteDatabase(current_app.config["DATABASE"], pragmas={"foreign_keys": 1})
+        )
+    else:
+        db_proxy.initialize(
+            PostgresqlDatabase(
+                os.environ["DB_NAME"],
+                host=os.environ["DB_HOST"],
+                port=os.environ["DB_PORT"],
+                user=os.environ["DB_USER"],
+                password=os.environ["DB_PASSWORD"],
+            )
+        )
+        db_proxy.connect()
 
 
 def init_db():

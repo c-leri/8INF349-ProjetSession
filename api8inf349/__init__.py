@@ -2,19 +2,12 @@ import os
 
 from flask import Flask, Response, request, redirect, url_for, abort, json
 
-from inf349.models import init_app, Product, Order
-from inf349.services import ProductServices, OrderService, APIError
+from api8inf349.models import init_app, Product, Order
+from api8inf349.services import ProductServices, OrderService, APIError
 
 
 def create_app(initial_config=None):
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        ENV="PROD"
-        if os.environ.get("PROD")
-        and os.environ["PROD"].lower() in ["true", "t", "yes", "y", "1"]
-        else "DEV",
-        DATABASE=os.path.join(app.instance_path, "db.sqlite"),
-    )
 
     if initial_config is not None:
         app.config.update(initial_config)
@@ -31,7 +24,7 @@ def create_app(initial_config=None):
         # Only run on first request
         app.before_request_funcs[None].remove(load_products)
 
-        if app.config["ENV"] != "TEST":
+        if not app.config["TESTING"]:
             ProductServices.load_products()
 
     @app.route("/")

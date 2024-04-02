@@ -1,6 +1,6 @@
 from playhouse.shortcuts import model_to_dict
 
-from inf349.models import (
+from api8inf349.models import (
     Product,
     OrderProduct,
     OrderShippingInformation,

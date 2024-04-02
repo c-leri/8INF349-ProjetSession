@@ -4,7 +4,7 @@ from urllib.error import HTTPError
 
 from flask import json
 
-from inf349.models import (
+from api8inf349.models import (
     Product,
     Order,
     OrderProduct,
@@ -91,14 +91,16 @@ def send_request(route, method="GET", data=None):
     try:
         with urlopen(request) as response:
             if response.headers["content-type"] == "application/json":
-                return json.loads(response.read())
+                return json.loads(response.read().decode("utf-8", errors="replace"))
             else:
                 return None
     except HTTPError as e:
         error = APIError()
         error.code = e.code
         if e.headers["content-type"] == "application/json":
-            error.content = json.loads(html.unescape(e.read().decode("utf-8")))
+            error.content = json.loads(
+                html.unescape(e.read().decode("utf-8", errors="replace"))
+            )
 
         raise error
 
@@ -109,8 +111,14 @@ class ProductServices(object):
         Product.delete().execute()
         Order.delete().execute()
         products = send_request("/products/")["products"]
+
         for product in products:
-            Product.create(**product)
+            Product.create(
+                **{
+                    k: v.replace("\x00", "\uFFFD") if isinstance(v, str) else v
+                    for k, v in product.items()
+                }
+            )
         print("Loaded products.")
 
 

@@ -1,4 +1,4 @@
-from inf349.models import Product
+from api8inf349.models import Product
 
 
 class TestOrder(object):

@@ -3,14 +3,14 @@ import tempfile
 
 import pytest
 
-from inf349 import create_app
-from inf349.models import init_db
+from api8inf349 import create_app
+from api8inf349.models import init_db
 
 
 @pytest.fixture
 def app():
     db_fd, db_path = tempfile.mkstemp()
-    app = create_app({"ENV": "TEST", "DATABASE": db_path})
+    app = create_app({"TESTING": True, "DATABASE": db_path})
     init_db()
 
     yield app
