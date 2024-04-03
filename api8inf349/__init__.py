@@ -53,7 +53,7 @@ def create_app(initial_config=None):
         if not order:
             return abort(404)
 
-        return {"order": order.dict()}
+        return {"order": OrderService.order_to_dict(order)}
 
     @app.route("/order/<int:order_id>", methods=["PUT"])
     def order_update(order_id):
@@ -64,7 +64,7 @@ def create_app(initial_config=None):
 
         try:
             order = OrderService.update_order_from_post_data(order, request.get_json())
-            return {"order": order.dict()}
+            return {"order": OrderService.order_to_dict(order)}
         except APIError as e:
             return abort(
                 Response(

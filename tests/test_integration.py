@@ -29,7 +29,7 @@ class TestOrder(object):
                 "total_price": 46.2,
                 "shipping_price": 5,
                 "paid": False,
-                "product": {"id": 1, "quantity": 2},
+                "products": [{"id": 1, "quantity": 2}],
                 "shipping_information": {},
                 "credit_card": {},
                 "transaction": {},
@@ -59,7 +59,7 @@ class TestOrder(object):
                 "total_price": 46.2,
                 "shipping_price": 5,
                 "paid": False,
-                "product": {"id": 1, "quantity": 2},
+                "products": [{"id": 1, "quantity": 2}],
                 "shipping_information": {
                     "country": "Canada",
                     "address": "125, rue Imaginaire",

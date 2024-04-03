@@ -13,6 +13,7 @@ from peewee import (
     BooleanField,
     AutoField,
     ForeignKeyField,
+    CompositeKey,
 )
 
 db_proxy = Proxy()
@@ -40,11 +41,11 @@ def init_db():
     db_proxy.create_tables(
         [
             Product,
+            Order,
             OrderProduct,
             OrderShippingInformation,
             OrderCreditCard,
             OrderTransaction,
-            Order,
         ]
     )
 
@@ -68,17 +69,37 @@ class Product(BaseModel):
     image = CharField()
 
 
-class OrderProduct(BaseModel):
+class Order(BaseModel):
     id = AutoField()
+    email = CharField(null=True)
+    total_price = FloatField()
+    shipping_price = FloatField()
+    paid = BooleanField(default=False)
+
+    def dict(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "total_price": self.total_price,
+            "shipping_price": self.shipping_price,
+            "paid": self.paid,
+        }
+
+
+class OrderProduct(BaseModel):
+    order = ForeignKeyField(Order, on_delete="cascade")
     product = ForeignKeyField(Product)
     quantity = IntegerField()
 
     def dict(self):
         return {"id": self.product.id, "quantity": self.quantity}
 
+    class Meta:
+        primary_key = CompositeKey("order", "product")
+
 
 class OrderShippingInformation(BaseModel):
-    id = AutoField()
+    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
     country = CharField()
     address = CharField()
     postal_code = CharField()
@@ -96,7 +117,7 @@ class OrderShippingInformation(BaseModel):
 
 
 class OrderCreditCard(BaseModel):
-    id = AutoField()
+    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
     name = CharField()
     number = CharField()
     cvv = CharField()
@@ -114,7 +135,8 @@ class OrderCreditCard(BaseModel):
 
 
 class OrderTransaction(BaseModel):
-    id = CharField(primary_key=True)
+    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
+    id = CharField()
     success = BooleanField()
     amount_charged = FloatField()
 
@@ -123,46 +145,6 @@ class OrderTransaction(BaseModel):
             "id": self.id,
             "success": self.success,
             "amount_charged": self.amount_charged,
-        }
-
-
-class Order(BaseModel):
-    id = AutoField()
-    email = CharField(null=True)
-    total_price = FloatField()
-    shipping_price = FloatField()
-    paid = BooleanField(default=False)
-    product = ForeignKeyField(OrderProduct)
-    shipping_information = ForeignKeyField(OrderShippingInformation, null=True)
-    credit_card = ForeignKeyField(OrderCreditCard, null=True)
-    transaction = ForeignKeyField(OrderTransaction, null=True)
-
-    @classmethod
-    def create_from_order_product(cls, order_product: OrderProduct):
-        total_weight = order_product.product.weight * order_product.quantity
-        return cls.create(
-            product=order_product,
-            total_price=order_product.product.price * order_product.quantity,
-            shipping_price=5
-            if total_weight < 500
-            else 10
-            if total_weight < 2000
-            else 25,
-        )
-
-    def dict(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            "total_price": self.total_price,
-            "shipping_price": self.shipping_price,
-            "paid": self.paid,
-            "product": self.product.dict(),
-            "shipping_information": {}
-            if not self.shipping_information
-            else self.shipping_information.dict(),
-            "credit_card": {} if not self.credit_card else self.credit_card.dict(),
-            "transaction": {} if not self.transaction else self.transaction.dict(),
         }
 
 

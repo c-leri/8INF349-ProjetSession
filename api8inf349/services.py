@@ -143,37 +143,103 @@ class ProductServices(object):
 
 class OrderService(object):
     @classmethod
-    def create_order_from_post_data(cls, post_data):
-        if "product" not in post_data or not post_data["product"]:
-            raise ProductError.missing_fields()
-
-        product_data = post_data["product"]
-
-        if (
-            "id" not in product_data
-            or not product_data["id"]
-            or "quantity" not in product_data
-            or not product_data["quantity"]
-        ):
-            raise ProductError.missing_fields()
-
-        id = product_data["id"]
-        quantity = product_data["quantity"]
-
-        product = Product.get_or_none(Product.id == id)
-
-        if not product:
-            raise ProductError.not_found(id)
-
-        if not product.in_stock:
-            raise ProductError.out_of_inventory()
-
-        return Order.create_from_order_product(
-            OrderProduct.create(product=product, quantity=quantity)
+    def order_to_dict(cls, order: Order) -> dict:
+        products = (
+            OrderProduct.select()
+            .where(OrderProduct.order == order)
+            .order_by(OrderProduct.product)
         )
 
+        shipping_information = OrderShippingInformation.get_or_none(
+            OrderShippingInformation.order == order
+        )
+
+        credit_card = OrderCreditCard.get_or_none(OrderCreditCard.order == order)
+
+        transaction = OrderTransaction.get_or_none(OrderTransaction.order == order)
+
+        order_dict = order.dict()
+
+        order_dict["products"] = [product.dict() for product in products]
+
+        order_dict["shipping_information"] = (
+            {} if not shipping_information else shipping_information.dict()
+        )
+
+        order_dict["credit_card"] = {} if not credit_card else credit_card.dict()
+
+        order_dict["transaction"] = {} if not transaction else transaction.dict()
+
+        return order_dict
+
     @classmethod
-    def update_order_from_post_data(cls, order, post_data):
+    def create_order_from_post_data(cls, post_data: dict) -> Order:
+        if "products" not in post_data:
+            if "product" not in post_data or not post_data["product"]:
+                raise ProductError.missing_fields()
+            products_data = [post_data["product"]]
+        else:
+            if not post_data["products"] or not post_data["products"][0]:
+                raise ProductError.missing_fields()
+            products_data = post_data["products"]
+
+        products = []
+        for product_data in products_data:
+            if (
+                "id" not in product_data
+                or not product_data["id"]
+                or "quantity" not in product_data
+                or not product_data["quantity"]
+            ):
+                raise ProductError.missing_fields()
+
+            id = product_data["id"]
+            quantity = product_data["quantity"]
+
+            product = Product.get_or_none(Product.id == id)
+
+            if not product:
+                raise ProductError.not_found(id)
+
+            if not product.in_stock:
+                raise ProductError.out_of_inventory()
+
+            products.append({"product": product, "quantity": quantity})
+
+        products_weight = map(
+            lambda product: product["product"].weight * product["quantity"], products
+        )
+        total_weight = sum(products_weight)
+
+        products_price = map(
+            lambda product: product["product"].price * product["quantity"], products
+        )
+        total_price = sum(products_price)
+
+        order = Order.create(
+            total_price=total_price,
+            shipping_price=5
+            if total_weight < 500
+            else 10
+            if total_weight < 2000
+            else 25,
+        )
+
+        OrderProduct.insert_many(
+            map(
+                lambda product: {
+                    "order": order,
+                    "product": product["product"],
+                    "quantity": product["quantity"],
+                },
+                products,
+            )
+        ).execute()
+
+        return order
+
+    @classmethod
+    def update_order_from_post_data(cls, order: Order, post_data: dict) -> Order:
         if order.paid:
             raise OrderError.already_paid()
 
@@ -191,7 +257,7 @@ class OrderService(object):
         return cls._set_order_credit_card(order, post_data)
 
     @classmethod
-    def _set_order_client_information(cls, order, order_data):
+    def _set_order_client_information(cls, order: Order, order_data: dict) -> Order:
         if (
             "email" not in order_data
             or not order_data["email"]
@@ -217,19 +283,16 @@ class OrderService(object):
             raise OrderError.missing_fields()
 
         order.email = order_data["email"]
-        order.shipping_information = OrderShippingInformation.create(
-            country=shipping_information_data["country"],
-            address=shipping_information_data["address"],
-            postal_code=shipping_information_data["postal_code"],
-            city=shipping_information_data["city"],
-            province=shipping_information_data["province"],
-        )
         order.save()
+
+        OrderShippingInformation.insert(
+            {"order": order, **shipping_information_data}
+        ).execute()
 
         return order
 
     @classmethod
-    def _set_order_credit_card(cls, order, post_data):
+    def _set_order_credit_card(cls, order: Order, post_data: dict) -> Order:
         if "credit_card" not in post_data or not post_data["credit_card"]:
             raise OrderError.missing_fields()
 
@@ -257,13 +320,17 @@ class OrderService(object):
         )["transaction"]
 
         order.paid = True
-        order.credit_card = OrderCreditCard.create(**credit_card_data)
-        order.transaction = OrderTransaction.create(
-            id=transaction_data["id"],
-            success=transaction_data["success"] is True
-            or transaction_data["success"] == "true",
-            amount_charged=transaction_data["amount_charged"],
-        )
         order.save()
+
+        OrderCreditCard.insert({"order": order, **credit_card_data}).execute()
+        OrderTransaction.insert(
+            {
+                "order": order,
+                "id": transaction_data["id"],
+                "success": transaction_data["success"] is True
+                or transaction_data["success"] == "true",
+                "amount_charged": transaction_data["amount_charged"],
+            }
+        ).execute()
 
         return order
