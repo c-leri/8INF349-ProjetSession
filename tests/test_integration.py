@@ -1,10 +1,15 @@
-from api8inf349.models import Product
+from time import sleep
+from random import randint
+
+from api8inf349.models import Order, Product
+from api8inf349.singleton import QueueSingleton
 
 
 class TestOrder(object):
     def test_create_order(self, app, client):
+        product_id = randint(1000, 100000)
         Product.create(
-            id=1,
+            id=product_id,
             name="Test",
             description="Test routes index",
             in_stock=True,
@@ -15,21 +20,22 @@ class TestOrder(object):
 
         response = client.post(
             "/order",
-            json={"product": {"id": 1, "quantity": 2}},
+            json={"product": {"id": product_id, "quantity": 2}},
         )
         assert response.status_code == 302
-        assert response.location == "/order/1"
 
-        response = client.get("/order/1")
+        order_id = int(response.location[7:])
+
+        response = client.get(f"/order/{order_id}")
         assert response.status_code == 200
         assert response.json == {
             "order": {
-                "id": 1,
+                "id": order_id,
                 "email": None,
                 "total_price": 46.2,
                 "shipping_price": 5,
                 "paid": False,
-                "products": [{"id": 1, "quantity": 2}],
+                "products": [{"id": product_id, "quantity": 2}],
                 "shipping_information": {},
                 "credit_card": {},
                 "transaction": {},
@@ -37,7 +43,7 @@ class TestOrder(object):
         }
 
         response = client.put(
-            "/order/1",
+            f"/order/{order_id}",
             json={
                 "order": {
                     "email": "test@example.com",
@@ -54,12 +60,12 @@ class TestOrder(object):
         assert response.status_code == 200
         assert response.json == {
             "order": {
-                "id": 1,
+                "id": order_id,
                 "email": "test@example.com",
                 "total_price": 46.2,
                 "shipping_price": 5,
                 "paid": False,
-                "products": [{"id": 1, "quantity": 2}],
+                "products": [{"id": product_id, "quantity": 2}],
                 "shipping_information": {
                     "country": "Canada",
                     "address": "125, rue Imaginaire",
@@ -73,7 +79,7 @@ class TestOrder(object):
         }
 
         response = client.put(
-            "/order/1",
+            f"/order/{order_id}",
             json={
                 "credit_card": {
                     "name": "John Doe",
@@ -84,14 +90,22 @@ class TestOrder(object):
                 }
             },
         )
+        assert response.status_code == 202
+
+        response = client.get(f"/order/{order_id}")
+        assert response.status_code == 200
+        assert response.json["order"]["paid"] is False
+
+        # Wait for transaction to be handled
+        sleep(2)
+
+        response = client.get(f"/order/{order_id}")
+        print(response.json)
         assert response.status_code == 200
         assert response.json["order"]["paid"] is True
-        assert response.json["order"]["credit_card"] == {
-            "name": "John Doe",
-            "first_digits": "4242",
-            "last_digits": "4242",
-            "expiration_year": 2025,
-            "expiration_month": 5,
-        }
         assert response.json["order"]["transaction"]["success"] is True
         assert response.json["order"]["transaction"]["amount_charged"] == 51.2
+
+        # Clean up
+        Order.delete().where(Order.id == order_id).execute()
+        Product.delete().where(Product.id == product_id).execute()

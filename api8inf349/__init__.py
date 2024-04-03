@@ -66,7 +66,10 @@ def create_app(initial_config=None):
 
             order = OrderService.update_order_from_post_data(order, request.get_json())
 
-            return {"order": OrderService.order_to_dict(order)}
+            if order:
+                return {"order": OrderService.order_to_dict(order)}
+            else:
+                return Response(content_type="application/json", status=202)
         except APIError as e:
             return abort(
                 Response(

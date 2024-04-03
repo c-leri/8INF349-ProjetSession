@@ -1,24 +1,27 @@
-import os
-import tempfile
-
 import pytest
 
 from api8inf349 import create_app
-from api8inf349.models import init_db
+from api8inf349.models import Order, Product, init_db
+from api8inf349.singleton import DatabaseSingleton
 
 
 @pytest.fixture
 def app():
-    db_fd, db_path = tempfile.mkstemp()
-    app = create_app({"TESTING": True, "DATABASE": db_path})
+    app = create_app({"TESTING": True})
     init_db()
 
-    yield app
-
-    os.close(db_fd)
-    os.unlink(db_path)
+    return app
 
 
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture()
+def db_transaction():
+    with DatabaseSingleton.get_db().atomic() as transaction:
+        Order.delete().execute()
+        Product.delete().execute()
+        yield
+        transaction.rollback()

@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.10-alpine
 
 WORKDIR /8inf349
 
@@ -11,4 +11,4 @@ RUN pip install -r requirements.txt
 
 ENV FLASK_APP=api8inf349
 
-CMD flask init-db; flask run --host=0.0.0.0
+CMD flask init-db; flask worker & flask run --host=0.0.0.0

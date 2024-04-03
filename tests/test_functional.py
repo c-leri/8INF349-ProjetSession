@@ -12,7 +12,7 @@ from api8inf349.services import OrderService
 
 
 class TestProduct(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         product = Product.create(
             id=1,
             name="Test",
@@ -43,7 +43,7 @@ class TestProduct(object):
 
 
 class TestOrder(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -63,7 +63,7 @@ class TestOrder(object):
         assert got_order.shipping_price == 5
         assert got_order.paid is True
 
-    def test_dict(self, app):
+    def test_dict(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -80,7 +80,7 @@ class TestOrder(object):
 
 
 class TestOrderProduct(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -98,21 +98,23 @@ class TestOrderProduct(object):
             image="test.jpg",
         )
 
-        order_product = OrderProduct.create(order=order, product=product, quantity=2)
+        order_product = OrderProduct.create(
+            order_id=order.id, product_id=product.id, quantity=2
+        )
 
-        assert order_product.order.id == order.id
-        assert order_product.product.id == 1
+        assert order_product.order_id == order.id
+        assert order_product.product_id == 1
         assert order_product.quantity == 2
 
         got_order_product = OrderProduct.get(
-            OrderProduct.order == order, OrderProduct.product == product
+            OrderProduct.order_id == order.id, OrderProduct.product_id == product.id
         )
 
-        assert got_order_product.order.id == order.id
-        assert got_order_product.product.id == 1
+        assert got_order_product.order_id == order.id
+        assert got_order_product.product_id == 1
         assert got_order_product.quantity == 2
 
-    def test_dict(self, app):
+    def test_dict(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -130,7 +132,9 @@ class TestOrderProduct(object):
             image="test.jpg",
         )
 
-        order_product = OrderProduct.create(order=order, product=product, quantity=2)
+        order_product = OrderProduct.create(
+            order_id=order.id, product_id=product.id, quantity=2
+        )
 
         order_product_dict = order_product.dict()
 
@@ -139,7 +143,7 @@ class TestOrderProduct(object):
 
 
 class TestOrderShippingInformation(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -148,7 +152,7 @@ class TestOrderShippingInformation(object):
         )
 
         order_shipping_information = OrderShippingInformation.create(
-            order=order,
+            order_id=order.id,
             country="Canada",
             address="125, rue Imaginaire",
             postal_code="XXX XXX",
@@ -156,7 +160,7 @@ class TestOrderShippingInformation(object):
             province="QC",
         )
 
-        assert order_shipping_information.order.id == order.id
+        assert order_shipping_information.order_id == order.id
         assert order_shipping_information.country == "Canada"
         assert order_shipping_information.address == "125, rue Imaginaire"
         assert order_shipping_information.postal_code == "XXX XXX"
@@ -164,17 +168,17 @@ class TestOrderShippingInformation(object):
         assert order_shipping_information.province == "QC"
 
         got_order_shipping_information = OrderShippingInformation.get_by_id(
-            order_shipping_information.order
+            order_shipping_information.order_id
         )
 
-        assert got_order_shipping_information.order.id == order.id
+        assert got_order_shipping_information.order_id == order.id
         assert got_order_shipping_information.country == "Canada"
         assert got_order_shipping_information.address == "125, rue Imaginaire"
         assert got_order_shipping_information.postal_code == "XXX XXX"
         assert got_order_shipping_information.city == "Chicoutimi"
         assert got_order_shipping_information.province == "QC"
 
-    def test_dict(self, app):
+    def test_dict(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -183,7 +187,7 @@ class TestOrderShippingInformation(object):
         )
 
         order_shipping_information = OrderShippingInformation.create(
-            order=order,
+            order_id=order.id,
             country="Canada",
             address="125, rue Imaginaire",
             postal_code="XXX XXX",
@@ -201,7 +205,7 @@ class TestOrderShippingInformation(object):
 
 
 class TestOrderCreditCard(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -210,7 +214,7 @@ class TestOrderCreditCard(object):
         )
 
         order_credit_card = OrderCreditCard.create(
-            order=order,
+            order_id=order.id,
             name="John Doe",
             number="1234 0000 0000 5678",
             cvv="156",
@@ -218,23 +222,23 @@ class TestOrderCreditCard(object):
             expiration_month=5,
         )
 
-        assert order_credit_card.order.id == order.id
+        assert order_credit_card.order_id == order.id
         assert order_credit_card.name == "John Doe"
         assert order_credit_card.number == "1234 0000 0000 5678"
         assert order_credit_card.cvv == "156"
         assert order_credit_card.expiration_year == 2025
         assert order_credit_card.expiration_month == 5
 
-        got_order_credit_card = OrderCreditCard.get_by_id(order_credit_card.order)
+        got_order_credit_card = OrderCreditCard.get_by_id(order_credit_card.order_id)
 
-        assert got_order_credit_card.order.id == order.id
+        assert got_order_credit_card.order_id == order.id
         assert got_order_credit_card.name == "John Doe"
         assert got_order_credit_card.number == "1234 0000 0000 5678"
         assert got_order_credit_card.cvv == "156"
         assert got_order_credit_card.expiration_year == 2025
         assert got_order_credit_card.expiration_month == 5
 
-    def test_dict(self, app):
+    def test_dict(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -243,7 +247,7 @@ class TestOrderCreditCard(object):
         )
 
         order_credit_card = OrderCreditCard.create(
-            order=order,
+            order_id=order.id,
             name="John Doe",
             number="1234 0000 0000 5678",
             cvv="156",
@@ -261,7 +265,7 @@ class TestOrderCreditCard(object):
 
 
 class TestOrderTransaction(object):
-    def test_create(self, app):
+    def test_create(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -270,22 +274,22 @@ class TestOrderTransaction(object):
         )
 
         order_transaction = OrderTransaction.create(
-            order=order, id="testid", success=True, amount_charged=1048.4
+            order_id=order.id, id="testid", success=True, amount_charged=1048.4
         )
 
-        assert order_transaction.order.id == order.id
+        assert order_transaction.order_id == order.id
         assert order_transaction.id == "testid"
         assert order_transaction.success is True
         assert order_transaction.amount_charged == 1048.4
 
-        got_order_transaction = OrderTransaction.get_by_id(order_transaction.order)
+        got_order_transaction = OrderTransaction.get_by_id(order_transaction.order_id)
 
-        assert got_order_transaction.order.id == order.id
+        assert got_order_transaction.order_id == order.id
         assert got_order_transaction.id == "testid"
         assert got_order_transaction.success is True
         assert got_order_transaction.amount_charged == 1048.4
 
-    def test_dict(self, app):
+    def test_dict(self, app, db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -294,7 +298,7 @@ class TestOrderTransaction(object):
         )
 
         order_transaction = OrderTransaction.create(
-            order=order, id="testid", success=True, amount_charged=1048.4
+            order_id=order.id, id="testid", success=True, amount_charged=1048.4
         )
 
         order_transaction_dict = order_transaction.dict()
@@ -305,7 +309,7 @@ class TestOrderTransaction(object):
 
 
 class TestOrderService(object):
-    def test_order_to_dict(self, app):
+    def test_order_to_dict(self, app, db_transaction):
         product = Product.create(
             id=1,
             name="Test",
@@ -324,12 +328,12 @@ class TestOrderService(object):
         )
 
         OrderProduct.insert(
-            {"order": order, "product": product, "quantity": 2},
+            {"order_id": order.id, "product_id": product.id, "quantity": 2},
         ).execute()
 
         OrderShippingInformation.insert(
             {
-                "order": order,
+                "order_id": order.id,
                 "country": "Canada",
                 "address": "125, rue Imaginaire",
                 "postal_code": "XXX XXX",
@@ -340,7 +344,7 @@ class TestOrderService(object):
 
         OrderCreditCard.insert(
             {
-                "order": order,
+                "order_id": order.id,
                 "name": "John Doe",
                 "number": "1234 0000 0000 5678",
                 "cvv": "156",
@@ -350,7 +354,12 @@ class TestOrderService(object):
         ).execute()
 
         OrderTransaction.insert(
-            {"order": order, "id": "testid", "success": True, "amount_charged": 1048.4},
+            {
+                "order_id": order.id,
+                "id": "testid",
+                "success": True,
+                "amount_charged": 1048.4,
+            },
         ).execute()
 
         order_dict = OrderService.order_to_dict(order)
@@ -390,13 +399,13 @@ class TestOrderService(object):
 
 
 class TestRoutes(object):
-    def test_empty_index(self, app, client):
+    def test_empty_index(self, app, client, db_transaction):
         response = client.get("/")
 
         assert response.status_code == 200
         assert response.json == {"products": []}
 
-    def test_index(self, app, client):
+    def test_index(self, app, client, db_transaction):
         product = Product.create(
             id=1,
             name="Test",

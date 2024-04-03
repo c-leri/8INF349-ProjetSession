@@ -1,7 +1,4 @@
-import os
-
 import click
-from flask import current_app
 from flask.cli import with_appcontext
 from peewee import (
     AutoField,
@@ -12,52 +9,29 @@ from peewee import (
     ForeignKeyField,
     IntegerField,
     Model,
-    PostgresqlDatabase,
-    Proxy,
-    SqliteDatabase,
 )
+from rq import Worker
 
-db_proxy = Proxy()
-
-
-def connect_db():
-    if current_app.config["TESTING"]:
-        db_proxy.initialize(
-            SqliteDatabase(current_app.config["DATABASE"], pragmas={"foreign_keys": 1})
-        )
-    else:
-        db_proxy.initialize(
-            PostgresqlDatabase(
-                os.environ["DB_NAME"],
-                host=os.environ["DB_HOST"],
-                port=os.environ["DB_PORT"],
-                user=os.environ["DB_USER"],
-                password=os.environ["DB_PASSWORD"],
-            )
-        )
-        db_proxy.connect()
+from api8inf349.singleton import DatabaseSingleton, QueueSingleton, CacheSingleton
 
 
 def init_db():
-    db_proxy.create_tables(
+    DatabaseSingleton.get_db().create_tables(
         [
             Product,
             Order,
             OrderProduct,
             OrderShippingInformation,
             OrderCreditCard,
+            OrderTransactionError,
             OrderTransaction,
         ]
     )
 
 
-def close_db_proxy(_):
-    db_proxy.close()
-
-
 class BaseModel(Model):
     class Meta:
-        database = db_proxy
+        database = DatabaseSingleton.get_db()
 
 
 class Product(BaseModel):
@@ -88,19 +62,21 @@ class Order(BaseModel):
 
 
 class OrderProduct(BaseModel):
-    order = ForeignKeyField(Order, on_delete="cascade")
-    product = ForeignKeyField(Product)
+    order_id = ForeignKeyField(Order, on_delete="cascade", lazy_load=False)
+    product_id = ForeignKeyField(Product, lazy_load=False)
     quantity = IntegerField()
 
     def dict(self):
-        return {"id": self.product.id, "quantity": self.quantity}
+        return {"id": self.product_id, "quantity": self.quantity}
 
     class Meta:
-        primary_key = CompositeKey("order", "product")
+        primary_key = CompositeKey("order_id", "product_id")
 
 
 class OrderShippingInformation(BaseModel):
-    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
+    order_id = ForeignKeyField(
+        Order, on_delete="CASCADE", lazy_load=False, primary_key=True
+    )
     country = CharField()
     address = CharField()
     postal_code = CharField()
@@ -118,7 +94,9 @@ class OrderShippingInformation(BaseModel):
 
 
 class OrderCreditCard(BaseModel):
-    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
+    order_id = ForeignKeyField(
+        Order, on_delete="CASCADE", lazy_load=False, primary_key=True
+    )
     name = CharField()
     number = CharField()
     cvv = CharField()
@@ -135,18 +113,43 @@ class OrderCreditCard(BaseModel):
         }
 
 
-class OrderTransaction(BaseModel):
-    order = ForeignKeyField(Order, on_delete="CASCADE", primary_key=True)
-    id = CharField()
-    success = BooleanField()
-    amount_charged = FloatField()
+class OrderTransactionError(BaseModel):
+    code = CharField()
+    name = CharField()
 
     def dict(self):
-        return {
-            "id": self.id,
+        return {"code": self.code, "name": self.name}
+
+    class Meta:
+        primarykey = CompositeKey("code", "name")
+
+
+class OrderTransaction(BaseModel):
+    order_id = ForeignKeyField(
+        Order, on_delete="CASCADE", lazy_load=False, primary_key=True
+    )
+    success = BooleanField()
+    amount_charged = FloatField()
+    id = CharField(null=True)
+    error = ForeignKeyField(OrderTransactionError, null=True)
+
+    def dict(self):
+        dict = {
             "success": self.success,
             "amount_charged": self.amount_charged,
         }
+
+        if self.id:
+            dict["id"] = self.id
+        else:
+            if self.error:
+                dict["error"] = self.error.dict()
+
+        return dict
+
+
+def close_db(_):
+    DatabaseSingleton.close_db()
 
 
 @click.command("init-db")
@@ -156,8 +159,14 @@ def init_db_command():
     click.echo("Initialized the database.")
 
 
+@click.command("worker")
+@with_appcontext
+def worker_command():
+    worker = Worker([QueueSingleton.get_queue()], connection=CacheSingleton.get_cache())
+    worker.work()
+
+
 def init_app(app):
-    with app.app_context():
-        connect_db()
-    app.teardown_appcontext(close_db_proxy)
+    app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(worker_command)
