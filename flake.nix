@@ -13,6 +13,7 @@
         name = "projet-session";
         packages = with pkgs; [
           postgresql_12
+          redis
         ];
         buildInputs = with pkgs; [
           libpqxx

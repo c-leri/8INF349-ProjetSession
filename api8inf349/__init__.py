@@ -1,9 +1,9 @@
 import os
 
-from flask import Flask, Response, request, redirect, url_for, abort, json
+from flask import Flask, Response, abort, json, redirect, request, url_for
 
-from api8inf349.models import init_app, Product, Order
-from api8inf349.services import ProductServices, OrderService, APIError
+from api8inf349.models import init_app
+from api8inf349.services import APIError, OrderService, ProductServices
 
 
 def create_app(initial_config=None):
@@ -29,7 +29,7 @@ def create_app(initial_config=None):
 
     @app.route("/")
     def index():
-        return {"products": [product for product in Product.select().dicts()]}
+        return {"products": ProductServices.get_product_dicts()}
 
     @app.route("/order", methods=["POST"])
     def order_create():
@@ -48,22 +48,24 @@ def create_app(initial_config=None):
 
     @app.route("/order/<int:order_id>")
     def order(order_id):
-        order = Order.get_or_none(Order.id == order_id)
-
-        if not order:
-            return abort(404)
-
-        return {"order": OrderService.order_to_dict(order)}
+        try:
+            return {"order": OrderService.get_order_dict(order_id)}
+        except APIError as e:
+            return abort(
+                Response(
+                    json.dumps(e.content),
+                    content_type="application/json",
+                    status=e.code,
+                )
+            )
 
     @app.route("/order/<int:order_id>", methods=["PUT"])
     def order_update(order_id):
-        order = Order.get_or_none(Order.id == order_id)
-
-        if not order:
-            return abort(404)
-
         try:
+            order = OrderService.get_order(order_id)
+
             order = OrderService.update_order_from_post_data(order, request.get_json())
+
             return {"order": OrderService.order_to_dict(order)}
         except APIError as e:
             return abort(

@@ -1,19 +1,20 @@
 import os
+
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 from peewee import (
+    AutoField,
+    BooleanField,
+    CharField,
+    CompositeKey,
+    FloatField,
+    ForeignKeyField,
+    IntegerField,
     Model,
-    SqliteDatabase,
     PostgresqlDatabase,
     Proxy,
-    CharField,
-    IntegerField,
-    FloatField,
-    BooleanField,
-    AutoField,
-    ForeignKeyField,
-    CompositeKey,
+    SqliteDatabase,
 )
 
 db_proxy = Proxy()

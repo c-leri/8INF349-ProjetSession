@@ -1,16 +1,18 @@
 import html
-from urllib.request import Request, urlopen
+import os
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 from flask import json
+from redis import Redis
 
 from api8inf349.models import (
-    Product,
     Order,
+    OrderCreditCard,
     OrderProduct,
     OrderShippingInformation,
-    OrderCreditCard,
     OrderTransaction,
+    Product,
 )
 
 
@@ -59,6 +61,17 @@ class ProductError(APIError):
 class OrderError(APIError):
     content = {"errors": {"order": {"code": "", "name": ""}}}
 
+    def not_found(order_id: int):
+        error = OrderError()
+
+        error.code = 404
+        error.content["errors"]["order"]["code"] = "not-found"
+        error.content["errors"]["order"][
+            "name"
+        ] = f"Auncune commande trouvée avec l'id {order_id}"
+
+        return error
+
     def missing_fields(
         message="Il manque un ou plusieurs champs qui sont obligatoires",
     ):
@@ -105,6 +118,16 @@ def send_request(route, method="GET", data=None):
         raise error
 
 
+class CacheService(object):
+    _instance: Redis = None
+
+    @classmethod
+    def get_cache(cls) -> Redis:
+        if not cls._instance:
+            cls._instance = Redis().from_url(url=os.environ["REDIS_URL"])
+        return cls._instance
+
+
 class ProductServices(object):
     @classmethod
     def load_products(cls):
@@ -140,6 +163,10 @@ class ProductServices(object):
         ).execute()
         print("Loaded products.")
 
+    @classmethod
+    def get_product_dicts(cls):
+        return [product for product in Product.select().dicts()]
+
 
 class OrderService(object):
     @classmethod
@@ -169,6 +196,31 @@ class OrderService(object):
         order_dict["credit_card"] = {} if not credit_card else credit_card.dict()
 
         order_dict["transaction"] = {} if not transaction else transaction.dict()
+
+        return order_dict
+
+    @classmethod
+    def get_order(cls, order_id: int) -> Order:
+        order = Order.get_or_none(Order.id == order_id)
+
+        if not order:
+            raise OrderError.not_found(order_id)
+
+        return order
+
+    @classmethod
+    def get_order_dict(cls, order_id: int) -> dict:
+        order_string = CacheService.get_cache().get(f"order:{order_id}")
+
+        if order_string:
+            order_dict = json.loads(order_string)
+        else:
+            order = Order.get_or_none(Order.id == order_id)
+
+            if not order:
+                raise OrderError.not_found(order_id)
+
+            order_dict = cls.order_to_dict(order)
 
         return order_dict
 
@@ -332,5 +384,9 @@ class OrderService(object):
                 "amount_charged": transaction_data["amount_charged"],
             }
         ).execute()
+
+        CacheService.get_cache().set(
+            f"order:{order.id}", json.dumps(cls.order_to_dict(order))
+        )
 
         return order

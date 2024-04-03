@@ -1,14 +1,13 @@
 from playhouse.shortcuts import model_to_dict
 
 from api8inf349.models import (
-    Product,
+    Order,
+    OrderCreditCard,
     OrderProduct,
     OrderShippingInformation,
-    OrderCreditCard,
     OrderTransaction,
-    Order,
+    Product,
 )
-
 from api8inf349.services import OrderService
 
 
