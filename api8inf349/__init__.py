@@ -27,6 +27,11 @@ def create_app(initial_config=None):
         if not app.config["TESTING"]:
             ProductServices.load_products()
 
+    @app.after_request
+    def allow_all_origins(response):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+
     @app.route("/")
     def index():
         return {"products": ProductServices.get_product_dicts()}
@@ -38,26 +43,14 @@ def create_app(initial_config=None):
 
             return redirect(url_for("order", order_id=order.id))
         except APIError as e:
-            return abort(
-                Response(
-                    json.dumps(e.content),
-                    content_type="application/json",
-                    status=e.code,
-                )
-            )
+            return abort(_api_errpr_response(e))
 
     @app.route("/order/<int:order_id>")
     def order(order_id):
         try:
             return {"order": OrderService.get_order_dict(order_id)}
         except APIError as e:
-            return abort(
-                Response(
-                    json.dumps(e.content),
-                    content_type="application/json",
-                    status=e.code,
-                )
-            )
+            return abort(_api_errpr_response(e))
 
     @app.route("/order/<int:order_id>", methods=["PUT"])
     def order_update(order_id):
@@ -71,12 +64,13 @@ def create_app(initial_config=None):
             else:
                 return Response(content_type="application/json", status=202)
         except APIError as e:
-            return abort(
-                Response(
-                    json.dumps(e.content),
-                    content_type="application/json",
-                    status=e.code,
-                )
-            )
+            return abort(_api_errpr_response(e))
+
+    def _api_errpr_response(error: APIError) -> Response:
+        return Response(
+            json.dumps(error.content),
+            content_type="application/json",
+            status=error.code,
+        )
 
     return app
