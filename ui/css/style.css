@@ -42,14 +42,14 @@ nav {
   display: grid;
   align-items: center;
   grid-template:
-    "sidebar_toggle title ."
+    "sidebar-toggle title ."
     / 50px 1fr 50px;
 }
 
 nav button {
   height: 50px;
   width: 50px;
-  grid-area: sidebar_toggle;
+  grid-area: sidebar-toggle;
   border-radius: 10px;
   color: var(--text);
   border: 1px solid var(--text);
@@ -60,9 +60,15 @@ nav button:hover {
   background-color: var(--surface0);
 }
 
+nav button svg {
+  display: block;
+  margin: auto;
+  height: 35px;
+  width: 35px;
+}
+
 nav h1 {
   grid-area: title;
-  text-align: title;
   text-align: center;
 }
 
@@ -83,12 +89,13 @@ nav h1 {
   left: 0;
   background-color: var(--mantle);
   overflow-x: hidden;
-  transition: 0.5s;
+  transition: width 0.3s;
+  border-right: 1px solid var(--crust);
 }
 
 main {
   width: 100%;
-  transition: margin-left 0.5s;
+  transition: margin-left 0.3s;
   margin: 10px;
 }
 
@@ -113,7 +120,89 @@ main {
 /* Cart */
 
 #cart {
+  padding: 15px;
+}
+
+#cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#cart-items .empty {
+  font-style: italic;
+}
+
+.cart-item {
   padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--crust);
+  background-color: var(--base);
+  align-items: center;
+  display: grid;
+  grid-template:
+    "name minus count plus"
+    / 1fr 2rem 2rem 2rem;
+}
+
+.cart-item .name {
+  grid-area: name;
+  font-weight: bold;
+}
+
+.cart-item .minus {
+  grid-area: minus;
+  height: 2.2rem;
+  color: var(--crust);
+  background-color: var(--red);
+  border: 1px solid var(--crust);
+  border-radius: 5px 0 0 5px;
+}
+
+.cart-item .minus:active {
+  color: var(--red);
+  background-color: var(--mantle);
+}
+
+.cart-item .minus svg {
+  display: block;
+  margin: auto;
+  height: 1.2rem;
+  width: 1.2rem;
+}
+
+.cart-item .count {
+  grid-area: count;
+  height: 2.2rem;
+  box-sizing: border-box;
+  margin: 0;
+  text-align: center;
+  line-height: 2.2rem;
+  color: var(--text);
+  background-color: var(--mantle);
+  border-top: 1px solid var(--crust);
+  border-bottom: 1px solid var(--crust);
+}
+
+.cart-item .plus {
+  grid-area: plus;
+  height: 2.2rem;
+  color: var(--crust);
+  background-color: var(--green);
+  border: 1px solid var(--crust);
+  border-radius: 0 5px 5px 0;
+}
+
+.cart-item .plus:active {
+  color: var(--green);
+  background-color: var(--mantle);
+}
+
+.cart-item .plus svg {
+  display: block;
+  margin: auto;
+  height: 1.2rem;
+  width: 1.2rem;
 }
 
 /* Products */
@@ -122,6 +211,10 @@ main {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(max(30%, 300px), 1fr));
+}
+
+#products .empty {
+  font-style: italic;
 }
 
 .product {
@@ -133,35 +226,64 @@ main {
   gap: 6px;
   grid-template:
     "name price"
-    "description description"
-    "stock ."
+    "description description" minmax(50px, 1fr)
+    "stock add-to-cart"
     / 1fr 1fr;
+}
+
+.product p {
+  margin: 0;
 }
 
 .product .name {
   grid-area: name;
-  margin: 0;
   font-weight: bold;
   font-size: larger;
 }
 
 .product .price {
   grid-area: price;
-  margin: 0;
   text-align: end;
 }
 
 .product .description {
   grid-area: description;
-  margin: 0;
 }
 
 .product .stock {
   grid-area: stock;
-  margin: 0;
   color: var(--red);
+  margin-top: auto;
 }
 
 .product .stock[data-in-stock] {
   color: var(--green);
+}
+
+.product .add-to-cart {
+  grid-area: add-to-cart;
+  color: var(--crust);
+  background-color: var(--green);
+  border: none;
+  border-radius: 5px;
+  width: fit-content;
+  justify-self: end;
+  padding: 5px 20px;
+}
+
+.product .add-to-cart svg {
+  display: block;
+  margin: auto;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.product .add-to-cart:active {
+  color: var(--green);
+  background-color: var(--mantle);
+}
+
+.product .add-to-cart:disabled {
+  color: var(--text);
+  background-color: var(--surface0);
 }

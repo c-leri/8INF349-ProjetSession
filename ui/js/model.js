@@ -26,9 +26,10 @@ function loadProducts() {
 
 /**
  * @param {number} productId
+ * @returns {void}
  */
 function addToCart(productId) {
-  let existingItem = cart.items.find((item) => item.id == productId);
+  let existingItem = cart.items.find((item) => item.id === productId);
 
   if (existingItem == undefined) {
     cart.items = [...cart.items, { id: productId, count: 1 }];
@@ -36,6 +37,24 @@ function addToCart(productId) {
     cart.items = [
       ...cart.items.filter((item) => item.id != existingItem.id),
       { id: existingItem.id, count: existingItem.count + 1 },
+    ];
+  }
+}
+
+/**
+ * @param {number} productId
+ * @returns {void}
+ */
+function removeFromCart(productId) {
+  let item = cart.items.find((item) => item.id === productId);
+  if (!item) return;
+
+  if (item.count <= 1) {
+    cart.items = [...cart.items.filter((cartItem) => cartItem.id != item.id)];
+  } else {
+    cart.items = [
+      ...cart.items.filter((cartItem) => cartItem.id != item.id),
+      { id: item.id, count: item.count - 1 },
     ];
   }
 }

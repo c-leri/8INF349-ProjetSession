@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7-labs
-FROM nginx:1.25.4
+FROM nginx
 
 COPY ./nginx-configs /etc/nginx/conf.d
 

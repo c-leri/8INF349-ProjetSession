@@ -14,6 +14,7 @@
   <body>
     <nav>
       <button>
+        <!-- Icon from https://icones.js.org/ -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="32"
@@ -34,12 +35,58 @@
       <div id="sidebar">
         <div id="cart">
           <h2>Cart</h2>
+          <div id="cart-items"></div>
         </div>
       </div>
 
       <main>
-        <div id="products" />
+        <div id="products"></div>
       </main>
+    </div>
+
+    <!-- Icons from https://icones.js.org/ -->
+    <div hidden>
+      <!-- Add to cart icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        id="add-to-cart-icon"
+      >
+        <path
+          fill="currentColor"
+          d="M12 9q-.425 0-.713-.288T11 8V6H9q-.425 0-.713-.288T8 5q0-.425.288-.713T9 4h2V2q0-.425.288-.713T12 1q.425 0 .713.288T13 2v2h2q.425 0 .713.288T16 5q0 .425-.288.713T15 6h-2v2q0 .425-.288.713T12 9ZM7 22q-.825 0-1.413-.588T5 20q0-.825.588-1.413T7 18q.825 0 1.413.588T9 20q0 .825-.588 1.413T7 22Zm10 0q-.825 0-1.413-.588T15 20q0-.825.588-1.413T17 18q.825 0 1.413.588T19 20q0 .825-.588 1.413T17 22ZM7 17q-1.15 0-1.738-.988T5.25 14.05L6.6 11.6L3 4H2q-.425 0-.713-.288T1 3q0-.425.288-.713T2 2h1.65q.275 0 .525.15t.375.425L8.525 11h7.025l3.6-6.5q.125-.225.35-.363T20 4q.575 0 .863.488t.012.987L17.3 11.95q-.275.5-.738.775T15.55 13H8.1L7 15h11q.425 0 .713.288T19 16q0 .425-.288.713T18 17H7Z"
+        />
+      </svg>
+
+      <!-- Plus icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        id="plus-icon"
+      >
+        <path
+          fill="currentColor"
+          d="M11 13H6q-.425 0-.712-.288T5 12t.288-.712T6 11h5V6q0-.425.288-.712T12 5t.713.288T13 6v5h5q.425 0 .713.288T19 12t-.288.713T18 13h-5v5q0 .425-.288.713T12 19t-.712-.288T11 18z"
+        />
+      </svg>
+
+      <!-- Minus icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        id="minus-icon"
+      >
+        <path
+          fill="currentColor"
+          d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"
+        />
+      </svg>
     </div>
   </body>
 </html>
