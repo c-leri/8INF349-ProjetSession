@@ -1,23 +1,13 @@
 /**
  * @type {HTMLDivElement}
  */
-let products = document.getElementById("products");
-
-window.onload = () => {
-  fetch_products().then((data) => {
-    products.append(
-      ...data.products
-        .sort((a, b) => a.id - b.id)
-        .map((product) => product_to_view(product))
-    );
-  });
-};
+let productsElement = document.getElementById("products");
 
 /**
  * @param {Product} product
  * @returns {HTMLDivElement}
  */
-function product_to_view(product) {
+function productToView(product) {
   let name = document.createElement("p");
   name.classList.add("name");
   name.textContent = product.name;
