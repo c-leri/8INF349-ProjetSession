@@ -1,4 +1,14 @@
 /**
+ * @type {HTMLButtonElement}
+ */
+let sidebarToggleButton = document.querySelector("nav button");
+
+/**
+ * @type {HTMLDivElement}
+ */
+let containerElement = document.getElementById("container");
+
+/**
  * @type {HTMLDivElement}
  */
 let productsElement = document.getElementById("products");
@@ -20,15 +30,15 @@ function productToView(product) {
   price.classList.add("price");
   price.textContent = `${product.price} $`;
 
-  let in_stock = document.createElement("p");
-  in_stock.classList.add("stock");
-  in_stock.dataset.inStock = product.in_stock;
-  in_stock.textContent = product.in_stock ? "In Stock" : "Out Of Stock";
+  let stock = document.createElement("p");
+  stock.classList.add("stock");
+  if (product.in_stock) stock.dataset.inStock = "";
+  stock.textContent = product.in_stock ? "In Stock" : "Out Of Stock";
 
   let root = document.createElement("div");
   root.classList.add("product");
   root.dataset.id = product.id;
-  root.append(name, description, price, in_stock);
+  root.append(name, description, price, stock);
 
   return root;
 }

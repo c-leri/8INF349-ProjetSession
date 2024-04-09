@@ -11,3 +11,9 @@ window.onload = () => {
 
   loadProducts();
 };
+
+sidebarToggleButton.onclick = () => {
+  if (containerElement.dataset.sidebarOpen === "")
+    delete containerElement.dataset.sidebarOpen;
+  else containerElement.dataset.sidebarOpen = "";
+};

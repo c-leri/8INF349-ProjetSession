@@ -1,8 +1,122 @@
+/* Palette from https://catppuccin.com/palette */
+
+:root {
+  --red: #d20f39;
+  --green: #40a02b;
+  --text: #4c4f69;
+  --surface0: #ccd0da;
+  --base: #eff1f5;
+  --mantle: #e6e9ef;
+  --crust: #dce0e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --red: #ed8796;
+    --green: #a6da95;
+    --text: #cad3f5;
+    --surface0: #363a4f;
+    --base: #24273a;
+    --mantle: #1e2030;
+    --crust: #181926;
+  }
+}
+
 html {
   color-scheme: light dark;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: var(--text);
+  background-color: var(--base);
 }
+
+body {
+  margin: 0;
+}
+
+/* Navbar */
+
+nav {
+  padding: 5px 10px;
+  background-color: var(--crust);
+  display: grid;
+  align-items: center;
+  grid-template:
+    "sidebar_toggle title ."
+    / 50px 1fr 50px;
+}
+
+nav button {
+  height: 50px;
+  width: 50px;
+  grid-area: sidebar_toggle;
+  border-radius: 10px;
+  color: var(--text);
+  border: 1px solid var(--text);
+  background-color: var(--crust);
+}
+
+nav button:hover {
+  background-color: var(--surface0);
+}
+
+nav h1 {
+  grid-area: title;
+  text-align: title;
+  text-align: center;
+}
+
+/* Sidebar */
+
+#container {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+
+#sidebar {
+  height: 100%;
+  width: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: var(--mantle);
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+main {
+  width: 100%;
+  transition: margin-left 0.5s;
+  margin: 10px;
+}
+
+#container[data-sidebar-open] #sidebar {
+  width: 350px;
+}
+
+#container[data-sidebar-open] main {
+  margin-left: 360px;
+}
+
+@media screen and (max-width: 660px) {
+  #container[data-sidebar-open] #sidebar {
+    width: 100%;
+  }
+
+  #container[data-sidebar-open] main {
+    margin-left: 10px;
+  }
+}
+
+/* Cart */
+
+#cart {
+  padding: 10px;
+}
+
+/* Products */
 
 #products {
   display: grid;
@@ -13,7 +127,8 @@ html {
 .product {
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid black;
+  border: 1px solid var(--crust);
+  background-color: var(--mantle);
   display: grid;
   gap: 6px;
   grid-template:
@@ -44,12 +159,9 @@ html {
 .product .stock {
   grid-area: stock;
   margin: 0;
+  color: var(--red);
 }
 
-.product .stock[data-in-stock="true"] {
-  color: green;
-}
-
-.product .stock[data-in-stock="false"] {
-  color: red;
+.product .stock[data-in-stock] {
+  color: var(--green);
 }
