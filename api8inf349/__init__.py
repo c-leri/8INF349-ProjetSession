@@ -30,6 +30,7 @@ def create_app(initial_config=None):
     @app.after_request
     def allow_all_origins(response):
         response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
         return response
 
     @app.route("/")

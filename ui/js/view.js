@@ -9,6 +9,11 @@ let sidebarToggleButton = document.querySelector("nav button");
 let cartItemsElement = document.getElementById("cart-items");
 
 /**
+ * @type {HTMLButtonElement}
+ */
+let buyButton = document.getElementById("buy");
+
+/**
  * @type {HTMLDivElement}
  */
 let containerElement = document.getElementById("container");

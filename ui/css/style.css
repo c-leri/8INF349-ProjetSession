@@ -1,5 +1,4 @@
 /* Palette from https://catppuccin.com/palette */
-
 :root {
   --red: #d20f39;
   --green: #40a02b;
@@ -123,6 +122,10 @@ main {
   padding: 15px;
 }
 
+#cart h2 {
+  margin: 10px 0;
+}
+
 #cart-items {
   display: flex;
   flex-direction: column;
@@ -131,6 +134,7 @@ main {
 
 #cart-items .empty {
   font-style: italic;
+  margin: 0;
 }
 
 .cart-item {
@@ -205,6 +209,24 @@ main {
   width: 1.2rem;
 }
 
+#buy {
+  width: fit-content;
+  margin-top: 20px;
+  padding: 5px 20px;
+  color: var(--crust);
+  background-color: var(--green);
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+}
+
+#buy:disabled {
+  color: var(--text);
+  background-color: var(--surface0);
+}
+
 /* Products */
 
 #products {
@@ -262,12 +284,12 @@ main {
 
 .product .add-to-cart {
   grid-area: add-to-cart;
+  justify-self: end;
   color: var(--crust);
   background-color: var(--green);
   border: none;
   border-radius: 5px;
   width: fit-content;
-  justify-self: end;
   padding: 5px 20px;
 }
 

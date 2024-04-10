@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/";
+const API_URL = "http://localhost:5000";
 
 /**
  * @type {Observable<Products>}
@@ -6,23 +6,46 @@ const API_URL = "http://localhost:5000/";
 let products = makeObservable({ products: [] });
 
 /**
- * @type {Observable<Cart>}
- */
-let cart = makeObservable({ items: [] });
-
-/**
  * Loads the products from the API into `products`
  * @returns {void}
  */
 function loadProducts() {
-  fetch(API_URL)
+  fetch(`${API_URL}/`)
     .then((response) => {
+      if (!response.ok) return;
       response.json().then((data) => {
         products.products = data.products;
       });
     })
     .catch((err) => console.error(err));
 }
+
+async function postOrder() {
+  fetch(`${API_URL}/order`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      products: [
+        ...cart.items.map((item) => ({ id: item.id, quantity: item.count })),
+      ],
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) return;
+
+      cart.items = [];
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+/**
+ * @type {Observable<Cart>}
+ */
+let cart = makeObservable({ items: [] });
 
 /**
  * @param {number} productId
@@ -83,3 +106,101 @@ function makeObservable(target) {
     },
   });
 }
+
+/**
+ * One of the products sent by the API
+ * @typedef {{
+ *   id: number
+ *   name: string
+ *   description: string
+ *   price: number
+ *   in_stock: boolean
+ * }} Product
+ */
+
+/**
+ * The products sentg by the API
+ * @typedef {{
+ *   products: Product[]
+ * }} Products
+ */
+
+/**
+ * The order sent by the API
+ * @typedef {{
+ *  id: number
+ *  email: string
+ *  paid: boolean
+ *  total_price: number
+ *  shipping_price: number
+ *  products: {
+ *   id: number
+ *   quantity: number
+ *  }[]
+ *  shipping_information: {
+ *   address: string
+ *   postal_code: string
+ *   city: string
+ *   province: string
+ *   country: string
+ *  }
+ *  credit_card: {
+ *   name: string
+ *   first_digits: string
+ *   last_digits: string
+ *   expiration_year: number
+ *   expiration_month: number
+ *  }
+ *  transaction: {
+ *    amount_charged: number
+ *  } & {
+ *    success: true
+ *    id: string
+ *  } | {
+ *    success: false
+ *    error: {
+ *     code: string
+ *     name: string
+ *    }
+ *  }
+ * }} Order
+ */
+
+/**
+ * An item of the cart
+ * - `id` corresponds to a `Product`'s id
+ * - `count` corresponds to the quantity of this product in the cart
+ * @typedef {{
+ *  id: number
+ *  count: number
+ * }} CartItem
+ */
+
+/**
+ * The content of the cart
+ * @typedef {{
+ *  items: CartItem[]
+ * }} Cart
+ */
+
+/**
+ * Function called on update by an observable
+ * @callback Observer
+ * @param {string} property
+ * @param {any} value
+ * @returns {void}
+ */
+
+/**
+ * Function to add an observer to an observable
+ * @callback Observe
+ * @param {Observer} observer
+ * @returns {void}
+ */
+
+/**
+ * @template T
+ * @typedef {{
+ *   observe: Observe
+ * } & T} Observable<T>
+ */
