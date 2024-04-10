@@ -28,9 +28,10 @@ def create_app(initial_config=None):
             ProductServices.load_products()
 
     @app.after_request
-    def allow_all_origins(response):
+    def access_control(response):
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT"
         return response
 
     @app.route("/")

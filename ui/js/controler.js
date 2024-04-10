@@ -43,7 +43,6 @@ cart.observe((property, value) => {
   }
 });
 
-// Toggle the sidebar
 sidebarToggleButton.onclick = () => {
   if (containerElement.dataset.sidebarOpen === "")
     delete containerElement.dataset.sidebarOpen;
@@ -51,5 +50,33 @@ sidebarToggleButton.onclick = () => {
 };
 
 buyButton.onclick = async () => {
-  postOrder();
+  let success = await postOrder();
+
+  if (success) personalInformationsDialog.showModal();
+};
+
+personalInformationsForm.onsubmit = async (event) => {
+  event.preventDefault();
+
+  let success = await putPersonalInformations(
+    new FormData(personalInformationsForm)
+  );
+
+  if (success) {
+    personalInformationsDialog.close();
+    personalInformationsForm.reset();
+    creditCardDialog.showModal();
+  }
+};
+
+creditCardForm.onsubmit = async (event) => {
+  event.preventDefault();
+
+  let success = await putCreditCard(new FormData(creditCardForm));
+
+  if (success) {
+    creditCardDialog.close();
+    creditCardForm.reset();
+    orderRecap(await getCurrentOrder());
+  }
 };

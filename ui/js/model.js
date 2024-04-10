@@ -6,6 +6,11 @@ const API_URL = "http://localhost:5000";
 let products = makeObservable({ products: [] });
 
 /**
+ * @type {number|undefined}
+ */
+let currentOrderID = undefined;
+
+/**
  * Loads the products from the API into `products`
  * @returns {void}
  */
@@ -20,26 +25,141 @@ function loadProducts() {
     .catch((err) => console.error(err));
 }
 
+/**
+ * Send the products in the cart to the API to create an order
+ * @returns {Promise<boolean>} false if the request fails in any way
+ */
 async function postOrder() {
-  fetch(`${API_URL}/order`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      products: [
-        ...cart.items.map((item) => ({ id: item.id, quantity: item.count })),
-      ],
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) return;
-
-      cart.items = [];
-    })
-    .catch((err) => {
-      console.error(err);
+  try {
+    let response = await fetch(`${API_URL}/order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        products: [
+          ...cart.items.map((item) => ({ id: item.id, quantity: item.count })),
+        ],
+      }),
     });
+
+    if (!response.ok || !response.redirected) return false;
+
+    cart.items = [];
+
+    response = await fetch(response.url);
+
+    if (!response.ok) return false;
+
+    let data = await response.json();
+
+    currentOrderID = data.order.id;
+
+    return true;
+  } catch (err) {
+    console.error(err);
+
+    return false;
+  }
+}
+
+/**
+ * Send the personal informations to the API to complete the current order
+ * @param {FormData} data
+ * @returns {Promise<boolean>} false if the request fails in any way
+ */
+async function putPersonalInformations(data) {
+  try {
+    if (currentOrderID === undefined) return false;
+
+    if (
+      !data.get("email") ||
+      !data.get("address") ||
+      !data.get("postal-code") ||
+      !data.get("city") ||
+      !data.get("province") ||
+      !data.get("country")
+    )
+      return false;
+
+    let response = await fetch(`${API_URL}/order/${currentOrderID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        order: {
+          email: data.get("email"),
+          shipping_information: {
+            address: data.get("address"),
+            postal_code: data.get("postal-code"),
+            city: data.get("city"),
+            province: data.get("province"),
+            country: data.get("country"),
+          },
+        },
+      }),
+    });
+
+    return response.ok;
+  } catch (err) {
+    console.error(err);
+
+    return false;
+  }
+}
+
+/**
+ * Send the credit card data to the API to complete the current order
+ * @param {FormData} data
+ * @returns {Promise<boolean>} false if the request fails in any way
+ */
+async function putCreditCard(data) {
+  try {
+    if (currentOrderID === undefined) return false;
+
+    if (
+      !data.get("name") ||
+      !data.get("number") ||
+      !data.get("expiration-month") ||
+      !data.get("expiration-year") ||
+      !data.get("cvv")
+    )
+      return false;
+
+    let response = await fetch(`${API_URL}/order/${currentOrderID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        credit_card: {
+          name: data.get("name"),
+          number: data.get("number"),
+          expiration_month: data.get("expiration-month"),
+          expiration_year: data.get("expiration-year"),
+          cvv: data.get("cvv"),
+        },
+      }),
+    });
+
+    return response.ok;
+  } catch (err) {
+    console.error(err);
+
+    return false;
+  }
+}
+
+/**
+ * @returns {Promise<Order|undefined>}
+ */
+async function getCurrentOrder() {
+  if (currentOrderID === undefined) return undefined;
+
+  let response = await fetch(`${API_URL}/order/${currentOrderID}`);
+
+  return await response.json();
 }
 
 /**

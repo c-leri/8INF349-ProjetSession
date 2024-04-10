@@ -215,7 +215,7 @@ main {
   padding: 5px 20px;
   color: var(--crust);
   background-color: var(--green);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   text-transform: uppercase;
   border: none;
@@ -308,4 +308,106 @@ main {
 .product .add-to-cart:disabled {
   color: var(--text);
   background-color: var(--surface0);
+}
+
+/* Dialogs */
+
+::backdrop {
+  background-color: #eff1f5;
+  opacity: 0.9;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::backdrop {
+    background-color: #24273a;
+  }
+}
+
+dialog {
+  color: var(--text);
+  background-color: var(--mantle);
+  border: 1px solid var(--crust);
+  border-radius: 10px;
+  padding: 30px;
+}
+
+dialog h2 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 40px;
+}
+
+dialog fieldset {
+  padding: 20px;
+  border-color: var(--text);
+  display: grid;
+  align-items: center;
+  gap: 15px;
+  grid-template-columns: auto 1fr;
+  border-radius: 10px;
+}
+
+dialog input[type="text"],
+dialog input[type="email"],
+dialog input[type="number"] {
+  color: var(--text);
+  background-color: var(--base);
+  border: 1px solid var(--text);
+  border-radius: 5px;
+  padding: 5px;
+}
+
+dialog input[type="submit"] {
+  justify-self: end;
+  font-size: 1.1rem;
+  color: var(--crust);
+  background-color: var(--green);
+  border: none;
+  border-radius: 5px;
+  width: fit-content;
+  padding: 5px 20px;
+  margin-top: 15px;
+}
+
+dialog input[type="submit"]:active {
+  color: var(--green);
+  background-color: var(--mantle);
+}
+
+#personal-informations form {
+  display: grid;
+  gap: 15px;
+  align-items: center;
+  grid-template:
+    "email-label email-input"
+    "shipping-informations shipping-informations"
+    ". submit"
+    / auto 1fr;
+}
+
+#personal-informations form label[for="email"] {
+  grid-area: email-label;
+}
+
+#personal-informations form #email {
+  grid-area: email-input;
+}
+
+#personal-informations form fieldset {
+  grid-area: shipping-informations;
+}
+
+#personal-informations form input[type="submit"] {
+  grid-area: submit;
+}
+
+#credit-card form {
+  display: grid;
+  gap: 15px;
+  align-items: center;
+  grid-template-columns: auto 1fr;
+}
+
+#credit-card form input[type="submit"] {
+  grid-column: 2 / 3;
 }

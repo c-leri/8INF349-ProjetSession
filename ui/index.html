@@ -46,6 +46,72 @@
       </main>
     </div>
 
+    <!-- Dialogs -->
+    <dialog id="personal-informations">
+      <h2>Please enter some personal informations</h2>
+
+      <form>
+        <label for="email">Email: </label>
+        <input id="email" name="email" type="email" required />
+
+        <fieldset>
+          <legend>Shipping Informations</legend>
+
+          <label for="address">Address: </label>
+          <input id="address" name="address" type="text" required />
+
+          <label for="postal-code">Postal Code: </label>
+          <input id="postal-code" name="postal-code" type="text" required />
+
+          <label for="city">City: </label>
+          <input id="city" name="city" type="text" required />
+
+          <label for="province">Province: </label>
+          <input id="province" name="province" type="text" required />
+
+          <label for="country">Country: </label>
+          <input id="country" name="country" type="text" required />
+        </fieldset>
+
+        <input type="submit" value="Confirm" />
+      </form>
+    </dialog>
+
+    <dialog id="credit-card">
+      <h2>Please enter your credit card informations</h2>
+
+      <form>
+        <label for="name">Name: </label>
+        <input id="name" name="name" type="text" />
+
+        <label for="number">Number: </label>
+        <input id="number" name="number" type="text" />
+
+        <label for="expiration-month">Expiration Month: </label>
+        <input
+          id="expiration-month"
+          name="expiration-month"
+          type="number"
+          min="1"
+          max="12"
+        />
+
+        <label for="expiration-year">Expiration Year: </label>
+        <input id="expiration-year" name="expiration-year" type="number" />
+
+        <label for="cvv">CVV: </label>
+        <input id="cvv" name="cvv" type="text" />
+
+        <input type="submit" value="Confirm" />
+      </form>
+    </dialog>
+
+    <dialog id="order-recap">
+      <h2>Order Recap</h2>
+
+      <div class="todo"></div>
+    </dialog>
+
     <!-- Icons from https://icones.js.org/ -->
     <div hidden>
       <!-- Add to cart icon -->

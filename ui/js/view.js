@@ -23,6 +23,35 @@ let containerElement = document.getElementById("container");
  */
 let productsElement = document.getElementById("products");
 
+/**
+ * @type {HTMLDialogElement}
+ */
+let personalInformationsDialog = document.getElementById(
+  "personal-informations"
+);
+
+/**
+ * @type {HTMLFormElement}
+ */
+let personalInformationsForm = document.querySelector(
+  "#personal-informations form"
+);
+
+/**
+ * @type {HTMLDialogElement}
+ */
+let creditCardDialog = document.getElementById("credit-card");
+
+/**
+ * @type {HTMLFormElement}
+ */
+let creditCardForm = document.querySelector("#credit-card form");
+
+/**
+ * @type {HTMLDialogElement}
+ */
+let orderRecapDialog = document.getElementById("order-recap");
+
 // Icons
 
 /**
@@ -105,4 +134,15 @@ function cartItemToView(cartItem) {
   root.append(name, minus, count, plus);
 
   return root;
+}
+
+/**
+ * @param {Order} order
+ */
+function orderRecap(order) {
+  let todo = orderRecapDialog.querySelector("div.todo");
+
+  todo.textContent = JSON.stringify(order);
+
+  orderRecapDialog.showModal();
 }
