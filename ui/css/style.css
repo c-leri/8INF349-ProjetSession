@@ -1,5 +1,6 @@
 /* Palette from https://catppuccin.com/palette */
 :root {
+  --mauve: #8839ef;
   --red: #d20f39;
   --green: #40a02b;
   --text: #4c4f69;
@@ -12,6 +13,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --mauve: #c6a0f6;
     --red: #ed8796;
     --green: #a6da95;
     --text: #cad3f5;
@@ -35,6 +37,11 @@ body {
   margin: 0;
 }
 
+button:focus,
+input:focus {
+  outline: 3px solid var(--mauve);
+}
+
 /* Navbar */
 
 nav {
@@ -42,15 +49,12 @@ nav {
   background-color: var(--crust);
   display: grid;
   align-items: center;
-  grid-template:
-    "sidebar-toggle title ."
-    / 50px 1fr 50px;
+  grid-template-columns: 50px 1fr 50px;
 }
 
 nav button {
   height: 50px;
   width: 50px;
-  grid-area: sidebar-toggle;
   border-radius: 10px;
   color: var(--text);
   border: 1px solid var(--text);
@@ -69,7 +73,6 @@ nav button svg {
 }
 
 nav h1 {
-  grid-area: title;
   text-align: center;
 }
 
@@ -148,18 +151,15 @@ main {
   background-color: var(--base);
   align-items: center;
   display: grid;
-  grid-template:
-    "name minus count plus"
-    / 1fr 2rem 2rem 2rem;
+  grid-template-columns: 1fr 2rem 2rem 2rem;
 }
 
 .cart-item .name {
-  grid-area: name;
   font-weight: bold;
+  margin-right: 5px;
 }
 
 .cart-item .minus {
-  grid-area: minus;
   height: 2.2rem;
   color: var(--crust);
   background-color: var(--red);
@@ -180,7 +180,6 @@ main {
 }
 
 .cart-item .count {
-  grid-area: count;
   height: 2.2rem;
   box-sizing: border-box;
   margin: 0;
@@ -193,7 +192,6 @@ main {
 }
 
 .cart-item .plus {
-  grid-area: plus;
   height: 2.2rem;
   color: var(--crust);
   background-color: var(--green);
@@ -251,18 +249,29 @@ main {
   background-color: var(--base);
   align-items: center;
   display: grid;
-  grid-template:
-    "name open-recap"
-    / 1fr 2rem;
+  gap: 5px;
+  grid-template-columns: auto 1fr 2rem;
 }
 
 .order .name {
-  grid-area: name;
   font-weight: bold;
 }
 
+.order .paid-badge {
+  height: 1.5rem;
+  color: var(--red);
+}
+
+.order[data-paid] .paid-badge {
+  color: var(--green);
+}
+
+.order .paid-badge svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
 .order .open-recap {
-  grid-area: open-recap;
   justify-self: end;
   color: var(--crust);
   background-color: var(--green);
@@ -381,11 +390,19 @@ main {
 }
 
 dialog {
+  width: min(600px, 100% - 60px);
   color: var(--text);
   background-color: var(--mantle);
   border: 1px solid var(--crust);
   border-radius: 10px;
   padding: 30px;
+}
+
+@media screen and (max-width: 660px) {
+  dialog {
+    margin-right: 0;
+    margin-left: 0;
+  }
 }
 
 dialog h2 {
@@ -401,6 +418,12 @@ dialog form {
   grid-template-columns: auto 1fr;
 }
 
+dialog form h3 {
+  margin: 0;
+  margin-top: 10px;
+  grid-column: 1 / 3;
+}
+
 dialog form input[type="text"],
 dialog form input[type="email"],
 dialog form input[type="number"] {
@@ -414,17 +437,6 @@ dialog form input[type="number"] {
 dialog form input::placeholder {
   color: var(--subtext0);
   opacity: 0.8;
-}
-
-dialog form fieldset {
-  padding: 20px;
-  border-color: var(--text);
-  display: grid;
-  align-items: center;
-  gap: 15px;
-  grid-template-columns: auto 1fr;
-  border-radius: 10px;
-  grid-column: 1 / 3;
 }
 
 dialog form input[type="submit"] {

@@ -2,7 +2,6 @@ from time import sleep
 from random import randint
 
 from api8inf349.models import Order, Product
-from api8inf349.singleton import QueueSingleton
 
 
 class TestOrder(object):

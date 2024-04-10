@@ -1,3 +1,8 @@
+/**
+ * @type {Observable<{open: boolean}>}
+ */
+let sidebarToggle = makeObservable({ open: false });
+
 // === API ===
 
 const API_URL = "http://localhost:5000";
@@ -8,9 +13,9 @@ const API_URL = "http://localhost:5000";
 let products = makeObservable({ products: [] });
 
 /**
- * @type {Observable<{orderIds: number[]}>}
+ * @type {Observable<{orders: ShortOrder[]}>}
  */
-let orders = makeObservable({ orderIds: [] });
+let orders = makeObservable({ orders: [] });
 
 /**
  * @type {number|undefined}
@@ -60,9 +65,9 @@ async function postOrder() {
 
     let data = await response.json();
 
-    orders.orderIds = [
-      ...orders.orderIds.filter((orderId) => orderId != data.order.id),
-      data.order.id,
+    orders.orders = [
+      ...orders.orders.filter((order) => order.id != data.order.id),
+      { id: data.order.id, paid: data.order.paid },
     ];
     currentOrderId = data.order.id;
 
@@ -154,6 +159,12 @@ async function putCreditCard(data) {
       }),
     });
 
+    // Reload the order after 2 seconds (paid badge)
+    let orderId = currentOrderId;
+    setTimeout(() => {
+      getOrder(orderId);
+    }, 2000);
+
     return response.ok;
   } catch (err) {
     console.error(err);
@@ -168,7 +179,14 @@ async function putCreditCard(data) {
 async function getOrder(orderId) {
   let response = await fetch(`${API_URL}/order/${orderId}`);
 
-  return await response.json();
+  let data = await response.json();
+
+  orders.orders = [
+    ...orders.orders.filter((order) => order.id != data.order.id),
+    { id: data.order.id, paid: data.order.paid },
+  ];
+
+  return data;
 }
 
 // === Cart ===
@@ -299,6 +317,14 @@ function makeObservable(target) {
  *    }
  *  }
  * }} Order
+ */
+
+/**
+ * Informations displayed in the order list
+ * @typedef {{
+ *  id: number
+ *  paid: boolean
+ * }} ShortOrder
  */
 
 /**

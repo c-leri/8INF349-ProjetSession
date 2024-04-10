@@ -21,10 +21,22 @@ window.onload = () => {
   loadProducts();
 
   cart.items = [];
-  orders.orderIds = [];
+  orders.orders = [];
 };
 
 // === Observers ===
+
+sidebarToggle.observe((property, value) => {
+  if (property === "open") {
+    if (value) {
+      containerElement.dataset.sidebarOpen = "";
+      buyButton.tabIndex = 0;
+    } else {
+      delete containerElement.dataset.sidebarOpen;
+      buyButton.tabIndex = -1;
+    }
+  }
+});
 
 // Display the cart content
 cart.observe((property, value) => {
@@ -48,10 +60,12 @@ cart.observe((property, value) => {
 
 // Display the order list
 orders.observe((property, value) => {
-  if (property === "orderIds") {
+  if (property === "orders") {
     if (value.length > 0) {
       ordersElement.replaceChildren(
-        ...value.sort((a, b) => a - b).map((orderId) => orderIdToView(orderId))
+        ...value
+          .sort((a, b) => a.id - b.id)
+          .map((order) => shortOrderToView(order))
       );
     } else {
       let emptyOrders = document.createElement("p");
@@ -65,15 +79,17 @@ orders.observe((property, value) => {
 // === Event Listener ===
 
 sidebarToggleButton.onclick = () => {
-  if (containerElement.dataset.sidebarOpen === "")
-    delete containerElement.dataset.sidebarOpen;
-  else containerElement.dataset.sidebarOpen = "";
+  sidebarToggle.open = !sidebarToggle.open;
 };
 
 buyButton.onclick = async () => {
   let success = await postOrder();
 
   if (success) personalInformationsDialog.showModal();
+};
+
+personalInformationsDialog.onclose = () => {
+  personalInformationsForm.reset();
 };
 
 personalInformationsForm.onsubmit = async (event) => {
@@ -85,9 +101,12 @@ personalInformationsForm.onsubmit = async (event) => {
 
   if (success) {
     personalInformationsDialog.close();
-    personalInformationsForm.reset();
     creditCardDialog.showModal();
   }
+};
+
+creditCardDialog.onclose = () => {
+  creditCardForm.reset();
 };
 
 creditCardForm.onsubmit = async (event) => {
@@ -97,6 +116,5 @@ creditCardForm.onsubmit = async (event) => {
 
   if (success) {
     creditCardDialog.close();
-    creditCardForm.reset();
   }
 };

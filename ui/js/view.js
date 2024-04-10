@@ -81,6 +81,16 @@ let minusIcon = document.getElementById("minus-icon");
  */
 let openIcon = document.getElementById("open-icon");
 
+/**
+ * @type {SVGElement}
+ */
+let checkCircleIcon = document.getElementById("check-circle-icon");
+
+/**
+ * @type {SVGElement}
+ */
+let xCircleIcon = document.getElementById("x-circle-icon");
+
 // === View Generation ===
 
 /**
@@ -143,6 +153,18 @@ function cartItemToView(cartItem) {
   plus.appendChild(plusIcon.cloneNode(true));
   plus.onclick = () => addToCart(cartItem.id);
 
+  sidebarToggle.observe((property, value) => {
+    if (property === "open") {
+      if (value) {
+        minus.tabIndex = 0;
+        plus.tabIndex = 0;
+      } else {
+        minus.tabIndex = -1;
+        plus.tabIndex = -1;
+      }
+    }
+  });
+
   let root = document.createElement("div");
   root.classList.add("cart-item");
   root.append(name, minus, count, plus);
@@ -151,24 +173,38 @@ function cartItemToView(cartItem) {
 }
 
 /**
- * @param {number} orderId
+ * @param {ShortOrder} order
  * @returns {HTMLDivElement}
  */
-function orderIdToView(orderId) {
+function shortOrderToView(order) {
   let name = document.createElement("p");
   name.classList.add("name");
-  name.textContent = `Order ${orderId}`;
+  name.textContent = `Order ${order.id}`;
+
+  let paidBadge = document.createElement("div");
+  paidBadge.classList.add("paid-badge");
+  paidBadge.appendChild(
+    order.paid ? checkCircleIcon.cloneNode(true) : xCircleIcon.cloneNode(true)
+  );
 
   let openRecapButton = document.createElement("button");
   openRecapButton.classList.add("open-recap");
   openRecapButton.appendChild(openIcon.cloneNode(true));
   openRecapButton.onclick = async () => {
-    openOrderRecap(await getOrder(orderId));
+    openOrderRecap(await getOrder(order.id));
   };
+
+  sidebarToggle.observe((property, value) => {
+    if (property === "open") {
+      if (value) openRecapButton.tabIndex = 0;
+      else openRecapButton.tabIndex = -1;
+    }
+  });
 
   let root = document.createElement("div");
   root.classList.add("order");
-  root.append(name, openRecapButton);
+  if (order.paid) root.dataset.paid = "";
+  root.append(name, paidBadge, openRecapButton);
 
   return root;
 }
