@@ -32,12 +32,16 @@
 
     <div id="container">
       <div id="sidebar">
-        <div id="cart">
+        <div id="sidebar-content">
           <h2>Cart</h2>
 
           <div id="cart-items"></div>
 
           <button id="buy">Buy</button>
+
+          <h2>Orders</h2>
+
+          <div id="orders"></div>
         </div>
       </div>
 
@@ -52,25 +56,61 @@
 
       <form>
         <label for="email">Email: </label>
-        <input id="email" name="email" type="email" required />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="john.doe@example.com"
+          required
+        />
 
         <fieldset>
           <legend>Shipping Informations</legend>
 
           <label for="address">Address: </label>
-          <input id="address" name="address" type="text" required />
+          <input
+            id="address"
+            name="address"
+            type="text"
+            placeholder="201, rue Président-Kennedy"
+            required
+          />
 
           <label for="postal-code">Postal Code: </label>
-          <input id="postal-code" name="postal-code" type="text" required />
+          <input
+            id="postal-code"
+            name="postal-code"
+            type="text"
+            placeholder="H2X 3Y7"
+            required
+          />
 
           <label for="city">City: </label>
-          <input id="city" name="city" type="text" required />
+          <input
+            id="city"
+            name="city"
+            type="text"
+            placeholder="Chicoutimi"
+            required
+          />
 
           <label for="province">Province: </label>
-          <input id="province" name="province" type="text" required />
+          <input
+            id="province"
+            name="province"
+            type="text"
+            placeholder="QC"
+            required
+          />
 
           <label for="country">Country: </label>
-          <input id="country" name="country" type="text" required />
+          <input
+            id="country"
+            name="country"
+            type="text"
+            placeholder="Canada"
+            required
+          />
         </fieldset>
 
         <input type="submit" value="Confirm" />
@@ -82,10 +122,23 @@
 
       <form>
         <label for="name">Name: </label>
-        <input id="name" name="name" type="text" />
+        <input
+          id="name"
+          name="name"
+          type="text"
+          placeholder="John Doe"
+          required
+        />
 
         <label for="number">Number: </label>
-        <input id="number" name="number" type="text" />
+        <input
+          id="number"
+          name="number"
+          type="text"
+          pattern="\d{4} \d{4} \d{4} \d{4}"
+          placeholder="1234 5678 1234 5678"
+          required
+        />
 
         <label for="expiration-month">Expiration Month: </label>
         <input
@@ -94,13 +147,28 @@
           type="number"
           min="1"
           max="12"
+          placeholder="8"
+          required
         />
 
         <label for="expiration-year">Expiration Year: </label>
-        <input id="expiration-year" name="expiration-year" type="number" />
+        <input
+          id="expiration-year"
+          name="expiration-year"
+          type="number"
+          placeholder="2024"
+          required
+        />
 
         <label for="cvv">CVV: </label>
-        <input id="cvv" name="cvv" type="text" />
+        <input
+          id="cvv"
+          name="cvv"
+          type="text"
+          pattern="\d{3}"
+          placeholder="123"
+          required
+        />
 
         <input type="submit" value="Confirm" />
       </form>
@@ -153,6 +221,20 @@
         <path
           fill="currentColor"
           d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"
+        />
+      </svg>
+
+      <!-- Open icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        id="open-icon"
+      >
+        <path
+          fill="currentColor"
+          d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h6q.425 0 .713.288T12 4t-.288.713T11 5H5v14h14v-6q0-.425.288-.712T20 12t.713.288T21 13v6q0 .825-.587 1.413T19 21zM19 6.4L10.4 15q-.275.275-.7.275T9 15t-.275-.7t.275-.7L17.6 5H15q-.425 0-.712-.288T14 4t.288-.712T15 3h5q.425 0 .713.288T21 4v5q0 .425-.288.713T20 10t-.712-.288T19 9z"
         />
       </svg>
     </div>

@@ -1,3 +1,5 @@
+// === API ===
+
 const API_URL = "http://localhost:5000";
 
 /**
@@ -6,9 +8,14 @@ const API_URL = "http://localhost:5000";
 let products = makeObservable({ products: [] });
 
 /**
+ * @type {Observable<{orderIds: number[]}>}
+ */
+let orders = makeObservable({ orderIds: [] });
+
+/**
  * @type {number|undefined}
  */
-let currentOrderID = undefined;
+let currentOrderId = undefined;
 
 /**
  * Loads the products from the API into `products`
@@ -53,7 +60,11 @@ async function postOrder() {
 
     let data = await response.json();
 
-    currentOrderID = data.order.id;
+    orders.orderIds = [
+      ...orders.orderIds.filter((orderId) => orderId != data.order.id),
+      data.order.id,
+    ];
+    currentOrderId = data.order.id;
 
     return true;
   } catch (err) {
@@ -70,7 +81,7 @@ async function postOrder() {
  */
 async function putPersonalInformations(data) {
   try {
-    if (currentOrderID === undefined) return false;
+    if (currentOrderId === undefined) return false;
 
     if (
       !data.get("email") ||
@@ -82,7 +93,7 @@ async function putPersonalInformations(data) {
     )
       return false;
 
-    let response = await fetch(`${API_URL}/order/${currentOrderID}`, {
+    let response = await fetch(`${API_URL}/order/${currentOrderId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -116,7 +127,7 @@ async function putPersonalInformations(data) {
  */
 async function putCreditCard(data) {
   try {
-    if (currentOrderID === undefined) return false;
+    if (currentOrderId === undefined) return false;
 
     if (
       !data.get("name") ||
@@ -127,7 +138,7 @@ async function putCreditCard(data) {
     )
       return false;
 
-    let response = await fetch(`${API_URL}/order/${currentOrderID}`, {
+    let response = await fetch(`${API_URL}/order/${currentOrderId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -152,15 +163,15 @@ async function putCreditCard(data) {
 }
 
 /**
- * @returns {Promise<Order|undefined>}
+ * @returns {Promise<Order>}
  */
-async function getCurrentOrder() {
-  if (currentOrderID === undefined) return undefined;
-
-  let response = await fetch(`${API_URL}/order/${currentOrderID}`);
+async function getOrder(orderId) {
+  let response = await fetch(`${API_URL}/order/${orderId}`);
 
   return await response.json();
 }
+
+// === Cart ===
 
 /**
  * @type {Observable<Cart>}
@@ -202,6 +213,8 @@ function removeFromCart(productId) {
   }
 }
 
+// === Observable ===
+
 /**
  * @template T
  * @param {T} target
@@ -226,6 +239,8 @@ function makeObservable(target) {
     },
   });
 }
+
+// == Types ===
 
 /**
  * One of the products sent by the API

@@ -1,3 +1,5 @@
+// === Elements ===
+
 /**
  * @type {HTMLButtonElement}
  */
@@ -12,6 +14,11 @@ let cartItemsElement = document.getElementById("cart-items");
  * @type {HTMLButtonElement}
  */
 let buyButton = document.getElementById("buy");
+
+/**
+ * @type {HTMLDivElement}
+ */
+let ordersElement = document.getElementById("orders");
 
 /**
  * @type {HTMLDivElement}
@@ -52,7 +59,7 @@ let creditCardForm = document.querySelector("#credit-card form");
  */
 let orderRecapDialog = document.getElementById("order-recap");
 
-// Icons
+// === Icons ===
 
 /**
  * @type {SVGElement}
@@ -68,6 +75,13 @@ let plusIcon = document.getElementById("plus-icon");
  * @type {SVGElement}
  */
 let minusIcon = document.getElementById("minus-icon");
+
+/**
+ * @type {SVGElement}
+ */
+let openIcon = document.getElementById("open-icon");
+
+// === View Generation ===
 
 /**
  * @param {Product} product
@@ -137,9 +151,32 @@ function cartItemToView(cartItem) {
 }
 
 /**
+ * @param {number} orderId
+ * @returns {HTMLDivElement}
+ */
+function orderIdToView(orderId) {
+  let name = document.createElement("p");
+  name.classList.add("name");
+  name.textContent = `Order ${orderId}`;
+
+  let openRecapButton = document.createElement("button");
+  openRecapButton.classList.add("open-recap");
+  openRecapButton.appendChild(openIcon.cloneNode(true));
+  openRecapButton.onclick = async () => {
+    openOrderRecap(await getOrder(orderId));
+  };
+
+  let root = document.createElement("div");
+  root.classList.add("order");
+  root.append(name, openRecapButton);
+
+  return root;
+}
+
+/**
  * @param {Order} order
  */
-function orderRecap(order) {
+function openOrderRecap(order) {
   let todo = orderRecapDialog.querySelector("div.todo");
 
   todo.textContent = JSON.stringify(order);

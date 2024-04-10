@@ -1,4 +1,4 @@
-// Setup
+// === Setup ===
 window.onload = () => {
   // Display the products
   products.observe((property, value) => {
@@ -21,7 +21,10 @@ window.onload = () => {
   loadProducts();
 
   cart.items = [];
+  orders.orderIds = [];
 };
+
+// === Observers ===
 
 // Display the cart content
 cart.observe((property, value) => {
@@ -42,6 +45,24 @@ cart.observe((property, value) => {
     }
   }
 });
+
+// Display the order list
+orders.observe((property, value) => {
+  if (property === "orderIds") {
+    if (value.length > 0) {
+      ordersElement.replaceChildren(
+        ...value.sort((a, b) => a - b).map((orderId) => orderIdToView(orderId))
+      );
+    } else {
+      let emptyOrders = document.createElement("p");
+      emptyOrders.textContent = "You haven't bought anything yet.";
+      emptyOrders.classList.add("empty");
+      ordersElement.replaceChildren(emptyOrders);
+    }
+  }
+});
+
+// === Event Listener ===
 
 sidebarToggleButton.onclick = () => {
   if (containerElement.dataset.sidebarOpen === "")
@@ -77,6 +98,5 @@ creditCardForm.onsubmit = async (event) => {
   if (success) {
     creditCardDialog.close();
     creditCardForm.reset();
-    orderRecap(await getCurrentOrder());
   }
 };
