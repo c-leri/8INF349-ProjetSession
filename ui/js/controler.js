@@ -83,9 +83,12 @@ sidebarToggleButton.onclick = () => {
 };
 
 buyButton.onclick = async () => {
+  buyButton.disabled = true;
+
   let success = await postOrder();
 
   if (success) personalInformationsDialog.showModal();
+  else buyButton.disabled = false;
 };
 
 personalInformationsDialog.onclose = () => {
@@ -117,4 +120,8 @@ creditCardForm.onsubmit = async (event) => {
   if (success) {
     creditCardDialog.close();
   }
+};
+
+closeOrderRecapButton.onclick = () => {
+  orderRecapDialog.close();
 };

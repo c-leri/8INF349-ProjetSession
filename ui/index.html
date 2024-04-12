@@ -51,8 +51,8 @@
     </div>
 
     <!-- Dialogs -->
-    <dialog id="personal-informations">
-      <h2>Please enter some personal informations</h2>
+    <dialog id="personal-information">
+      <h2>Please enter some personal information</h2>
 
       <form>
         <label for="email">Email: </label>
@@ -116,7 +116,7 @@
     </dialog>
 
     <dialog id="credit-card">
-      <h2>Please enter your credit card informations</h2>
+      <h2>Please enter your credit card information</h2>
 
       <form>
         <label for="name">Name: </label>
@@ -175,7 +175,122 @@
     <dialog id="order-recap">
       <h2>Order Recap</h2>
 
-      <div class="todo"></div>
+      <button id="order-close">
+        <!-- Icon from https://icones.js.org/ -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          fill="currentColor"
+          viewBox="0 0 256 256"
+        >
+          <path
+            d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"
+          ></path>
+        </svg>
+      </button>
+
+      <h3>Products</h3>
+
+      <div id="order-products"></div>
+
+      <p>
+        <span class="label">Total Price:</span>
+        <span id="order-total-price"></span>
+      </p>
+
+      <p>
+        <span class="label">Shipping Price:</span>
+        <span id="order-shipping-price"></span>
+      </p>
+
+      <div id="order-personal-information">
+        <hr />
+
+        <p>
+          <span class="label">Email:</span>
+          <span id="order-email"></span>
+        </p>
+
+        <h3>Shipping Information</h3>
+
+        <p>
+          <span class="label">Address:</span>
+          <span id="order-address"></span>
+        </p>
+
+        <p>
+          <span class="label">Postal Code:</span>
+          <span id="order-postal-code"></span>
+        </p>
+
+        <p>
+          <span class="label">City:</span>
+          <span id="order-city"></span>
+        </p>
+
+        <p>
+          <span class="label">Province:</span>
+          <span id="order-province"></span>
+        </p>
+
+        <p>
+          <span class="label">Country:</span>
+          <span id="order-country"></span>
+        </p>
+      </div>
+
+      <div id="order-credit-card">
+        <hr />
+
+        <h3>Credit Card</h3>
+
+        <p>
+          <span class="label">Name:</span>
+          <span id="order-credit-card-name"></span>
+
+          <p>
+            <span class="label">Number:</span>
+            <span id="order-credit-card-number"></span>
+          </p>
+
+          <p>
+            <span class="label">Expiration Date:</span>
+            <span id="order-credit-card-expiration"></span>
+          </p>
+        </p>
+      </div>
+
+      <div id="order-transaction">
+        <hr />
+
+        <div id="order-transaction-title">
+          <h3>Transaction</h3>
+          <div id="order-transaction-success"></div>
+        </div>
+
+        <p id="order-transaction-id-container">
+          <span class="label">ID:</span>
+          <span id="order-transaction-id"></span>
+        </p>
+
+        <div id="order-transaction-error">
+          <p>
+            <span class="label">Error Code:</span>
+            <span id="order-transaction-error-code"></span>
+          </p>
+
+          <p>
+            <span class="label">Error Name:</span>
+            <span id="order-transaction-error-name"></span>
+          </p>
+        </div>
+
+        <p>
+          <span class="label">Amount Charged:</span>
+          <span id="order-transaction-amount-charged"></span>
+        </p>
+      </div>
     </dialog>
 
     <!-- Icons from https://icones.js.org/ -->

@@ -80,7 +80,7 @@ async function postOrder() {
 }
 
 /**
- * Send the personal informations to the API to complete the current order
+ * Send the personal information to the API to complete the current order
  * @param {FormData} data
  * @returns {Promise<boolean>} false if the request fails in any way
  */
@@ -186,7 +186,7 @@ async function getOrder(orderId) {
     { id: data.order.id, paid: data.order.paid },
   ];
 
-  return data;
+  return data.order;
 }
 
 // === Cart ===
@@ -279,6 +279,13 @@ function makeObservable(target) {
  */
 
 /**
+ * @typedef {{
+ *  id: number
+ *  quantity: number
+ * }} OrderProduct
+ */
+
+/**
  * The order sent by the API
  * @typedef {{
  *  id: number
@@ -286,10 +293,7 @@ function makeObservable(target) {
  *  paid: boolean
  *  total_price: number
  *  shipping_price: number
- *  products: {
- *   id: number
- *   quantity: number
- *  }[]
+ *  products: OrderProduct[]
  *  shipping_information: {
  *   address: string
  *   postal_code: string

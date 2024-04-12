@@ -34,14 +34,14 @@ let productsElement = document.getElementById("products");
  * @type {HTMLDialogElement}
  */
 let personalInformationsDialog = document.getElementById(
-  "personal-informations"
+  "personal-information"
 );
 
 /**
  * @type {HTMLFormElement}
  */
 let personalInformationsForm = document.querySelector(
-  "#personal-informations form"
+  "#personal-information form"
 );
 
 /**
@@ -58,6 +58,11 @@ let creditCardForm = document.querySelector("#credit-card form");
  * @type {HTMLDialogElement}
  */
 let orderRecapDialog = document.getElementById("order-recap");
+
+/**
+ * @type {HTMLButtonElement}
+ */
+let closeOrderRecapButton = document.getElementById("order-close");
 
 // === Icons ===
 
@@ -108,7 +113,7 @@ function productToView(product) {
 
   let price = document.createElement("p");
   price.classList.add("price");
-  price.textContent = `${product.price} $`;
+  price.textContent = `$${product.price}`;
 
   let stock = document.createElement("p");
   stock.classList.add("stock");
@@ -211,11 +216,154 @@ function shortOrderToView(order) {
 
 /**
  * @param {Order} order
+ * @returns {void}
  */
 function openOrderRecap(order) {
-  let todo = orderRecapDialog.querySelector("div.todo");
+  let productsElement = orderRecapDialog.querySelector("#order-products");
+  productsElement.replaceChildren(
+    ...order.products.map((product) => orderProductToView(product))
+  );
 
-  todo.textContent = JSON.stringify(order);
+  let totalPriceElement = orderRecapDialog.querySelector("#order-total-price");
+  totalPriceElement.textContent = `$${order.total_price}`;
+
+  let shippingPriceElement = orderRecapDialog.querySelector(
+    "#order-shipping-price"
+  );
+  shippingPriceElement.textContent = `$${order.shipping_price}`;
+
+  if (
+    order.email &&
+    order.shipping_information &&
+    Object.keys(order.shipping_information).length > 0
+  ) {
+    orderRecapDialog.querySelector(
+      "#order-personal-information"
+    ).hidden = false;
+
+    let emailElement = orderRecapDialog.querySelector("#order-email");
+    emailElement.textContent = order.email;
+
+    let addressElement = orderRecapDialog.querySelector("#order-address");
+    addressElement.textContent = order.shipping_information.address;
+
+    let postalCodeElement =
+      orderRecapDialog.querySelector("#order-postal-code");
+    postalCodeElement.textContent = order.shipping_information.postal_code;
+
+    let cityElement = orderRecapDialog.querySelector("#order-city");
+    cityElement.textContent = order.shipping_information.city;
+
+    let provinceElement = orderRecapDialog.querySelector("#order-province");
+    provinceElement.textContent = order.shipping_information.province;
+
+    let countryElement = orderRecapDialog.querySelector("#order-country");
+    countryElement.textContent = order.shipping_information.country;
+  } else {
+    orderRecapDialog.querySelector("#order-personal-information").hidden = true;
+  }
+
+  if (order.credit_card && Object.keys(order.credit_card).length > 0) {
+    orderRecapDialog.querySelector("#order-credit-card").hidden = false;
+
+    let creditCardNameElement = orderRecapDialog.querySelector(
+      "#order-credit-card-name"
+    );
+    creditCardNameElement.textContent = order.credit_card.name;
+
+    let creditCardNumberElement = orderRecapDialog.querySelector(
+      "#order-credit-card-number"
+    );
+    creditCardNumberElement.textContent = `${order.credit_card.first_digits}...${order.credit_card.last_digits}`;
+
+    let creditCardExpirationElement = orderRecapDialog.querySelector(
+      "#order-credit-card-expiration"
+    );
+    creditCardExpirationElement.textContent = `${(
+      "0" + order.credit_card.expiration_month
+    ).slice(-2)}/${order.credit_card.expiration_year}`;
+  } else {
+    orderRecapDialog.querySelector("#order-credit-card").hidden = true;
+  }
+
+  if (order.transaction && Object.keys(order.transaction).length > 0) {
+    orderRecapDialog.querySelector("#order-transaction").hidden = false;
+
+    let transactionSuccessElement = orderRecapDialog.querySelector(
+      "#order-transaction-success"
+    );
+    transactionSuccessElement.replaceChildren(
+      order.transaction.success
+        ? checkCircleIcon.cloneNode(true)
+        : xCircleIcon.cloneNode(true)
+    );
+
+    if (order.transaction.success) {
+      transactionSuccessElement.dataset.success = "";
+
+      orderRecapDialog.querySelector(
+        "#order-transaction-id-container"
+      ).hidden = false;
+      orderRecapDialog.querySelector("#order-transaction-error").hidden = true;
+
+      let transactionIdElement = orderRecapDialog.querySelector(
+        "#order-transaction-id"
+      );
+      transactionIdElement.textContent = order.transaction.id;
+    } else {
+      delete transactionSuccessElement.dataset.success;
+
+      orderRecapDialog.querySelector(
+        "#order-transaction-id-container"
+      ).hidden = true;
+      orderRecapDialog.querySelector("#order-transaction-error").hidden = false;
+
+      let transactionErrorCodeElement = orderRecapDialog.querySelector(
+        "#order-transaction-error-code"
+      );
+      transactionErrorCodeElement.textContent = order.transaction.error.code;
+
+      let transactionErrorNameElement = orderRecapDialog.querySelector(
+        "#order-transaction-error-name"
+      );
+      transactionErrorNameElement.textContent = order.transaction.error.name;
+    }
+
+    let transactionAmountChargedElement = orderRecapDialog.querySelector(
+      "#order-transaction-amount-charged"
+    );
+    transactionAmountChargedElement.textContent = `$${order.transaction.amount_charged}`;
+  } else {
+    orderRecapDialog.querySelector("#order-transaction").hidden = true;
+  }
 
   orderRecapDialog.showModal();
+}
+
+/**
+ * @param {OrderProduct} orderProduct
+ * @returns {HTMLDivElement}
+ */
+function orderProductToView(orderProduct) {
+  let product = products.products.find(
+    (product) => product.id === orderProduct.id
+  );
+
+  let name = document.createElement("p");
+  name.classList.add("name");
+  name.textContent = product.name;
+
+  let quantity = document.createElement("p");
+  quantity.classList.add("quantity");
+  quantity.textContent = `x${orderProduct.quantity}`;
+
+  let price = document.createElement("p");
+  price.classList.add("price");
+  price.textContent = `$${(product.price * orderProduct.quantity).toFixed(2)}`;
+
+  let root = document.createElement("div");
+  root.classList.add("product");
+  root.append(name, quantity, price);
+
+  return root;
 }
