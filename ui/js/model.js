@@ -5,7 +5,7 @@ let sidebarToggle = makeObservable({ open: false });
 
 // === API ===
 
-const API_URL = "http://localhost:5000";
+const API_URL = `http://${window.location.hostname}:5000`;
 
 /**
  * @type {Observable<Products>}
