@@ -1,12 +1,11 @@
 from time import sleep
-from random import randint
 
 from api8inf349.models import Order, Product
 
 
 class TestOrder(object):
-    def test_create_order(self, app, client):
-        product_id = randint(1000, 100000)
+    def test_create_order(self, client, with_worker):
+        product_id = 1
         Product.create(
             id=product_id,
             name="Test",

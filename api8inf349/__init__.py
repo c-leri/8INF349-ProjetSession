@@ -7,15 +7,17 @@ from api8inf349.services import APIError, OrderService, ProductServices
 
 
 def create_app(initial_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
+
+    app.config["DB_NAME"] = os.getenv("DB_NAME")
+    app.config["DB_USER"] = os.getenv("DB_USER")
+    app.config["DB_PASSWORD"] = os.getenv("DB_PASSWORD")
+    app.config["DB_HOST"] = os.getenv("DB_HOST")
+    app.config["DB_PORT"] = os.getenv("DB_PORT")
+    app.config["REDIS_URL"] = os.getenv("REDIS_URL")
 
     if initial_config is not None:
         app.config.update(initial_config)
-
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
 
     init_app(app)
 
@@ -33,6 +35,8 @@ def create_app(initial_config=None):
         response.headers["Access-Control-Allow-Headers"] = "Content-Type"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT"
         return response
+
+    # ==== Endpoints ====
 
     @app.route("/")
     def index():

@@ -41,11 +41,7 @@ Définition des routes et de la méthode de création de l'application flask.
 
 #### `api8inf349/models.py`
 
-Définition des entités peewee et des commandes pour initialiser la bd et lancer le worker.
-
-#### `api8inf349/singleton.py`
-
-Définition de singletons pour la base de donnée, le cache et la queue afin d'avoir une instance de chaque accessible partout dans l'application (et dans les test). 
+Définition des entités peewee, des singletons pour la base de donnée et le cache et des commandes pour initialiser la bd et lancer le worker.
 
 #### `api8inf349/services.py`
 
@@ -53,7 +49,7 @@ Logique de l'application en elle-même.
 
 ### `tests/`
 
-Tests pour l'API. Peuvent être lancé avec la commande `python -m pytest` à la racine du projet (nécessite que le cache et la base de données soient actifs et que les variables d'environnements nécessaires pour s'y connecter soient initialisées).
+Tests pour l'API. Peuvent être lancé avec la commande `python -m pytest` à la racine du projet (pas besoin d'avoir les conteneurs pour la base de données qui roulent, ils sont executés et supprimés automatiquement grâce à [testcontainers](https://testcontainers.com/), pas besoin non plus d'avoir le worker qui roule, il est éxecuté automatiquement pour les tests qui en ont besoin).
 
 ### `Dockerfile`
 

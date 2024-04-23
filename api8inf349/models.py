@@ -1,22 +1,61 @@
 import click
+from flask import current_app, g
 from flask.cli import with_appcontext
 from peewee import (
     AutoField,
     BooleanField,
     CharField,
     CompositeKey,
+    DatabaseProxy,
     FloatField,
     ForeignKeyField,
     IntegerField,
     Model,
+    PostgresqlDatabase,
 )
-from rq import Worker
+from redis import Redis
+from rq import Queue, Worker
 
-from api8inf349.singleton import DatabaseSingleton, QueueSingleton, CacheSingleton
+# ==== Singletons ====
+
+
+def get_db():
+    if "db" not in g:
+        g.db = PostgresqlDatabase(
+            current_app.config["DB_NAME"],
+            host=current_app.config["DB_HOST"],
+            port=current_app.config["DB_PORT"],
+            user=current_app.config["DB_USER"],
+            password=current_app.config["DB_PASSWORD"],
+        )
+        g.db.connect()
+    return g.db
+
+
+def close_db(_):
+    db = g.pop("db", None)
+
+    if db is not None:
+        db.close()
+
+
+def get_cache():
+    if "cache" not in g:
+        g.cache = Redis.from_url(url=current_app.config["REDIS_URL"])
+    return g.cache
+
+
+def get_queue():
+    if "queue" not in g:
+        g.queue = Queue("api8inf349", connection=get_cache())
+    return g.queue
+
+
+# ==== Peewee Models ====
 
 
 def init_db():
-    DatabaseSingleton.get_db().create_tables(
+    get_db().create_tables(
         [
             Product,
             Order,
@@ -29,9 +68,12 @@ def init_db():
     )
 
 
+models_proxy = DatabaseProxy()
+
+
 class BaseModel(Model):
     class Meta:
-        database = DatabaseSingleton.get_db()
+        database = models_proxy
 
 
 class Product(BaseModel):
@@ -148,8 +190,7 @@ class OrderTransaction(BaseModel):
         return dict
 
 
-def close_db(_):
-    DatabaseSingleton.close_db()
+# ==== Flask commands ====
 
 
 @click.command("init-db")
@@ -162,7 +203,7 @@ def init_db_command():
 @click.command("worker")
 @with_appcontext
 def worker_command():
-    worker = Worker([QueueSingleton.get_queue()], connection=CacheSingleton.get_cache())
+    worker = Worker([get_queue()], connection=get_cache())
     worker.work()
 
 
@@ -170,3 +211,5 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
     app.cli.add_command(worker_command)
+    with app.app_context():
+        models_proxy.initialize(get_db())

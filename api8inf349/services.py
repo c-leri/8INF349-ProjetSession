@@ -12,8 +12,11 @@ from api8inf349.models import (
     OrderTransaction,
     OrderTransactionError,
     Product,
+    get_cache,
+    get_queue,
 )
-from api8inf349.singleton import CacheSingleton, QueueSingleton
+
+# ==== Errors ====
 
 
 class APIError(Exception):
@@ -102,6 +105,9 @@ class OrderError(APIError):
         return error
 
 
+# ==== Util function ====
+
+
 def send_request(route, method="GET", data=None):
     request = Request(f"http://dimprojetu.uqac.ca/~jgnault/shops{route}")
     request.method = method
@@ -125,6 +131,9 @@ def send_request(route, method="GET", data=None):
             )
 
         raise error
+
+
+# ==== Services ====
 
 
 class ProductServices(object):
@@ -211,7 +220,7 @@ class OrderService(object):
 
     @classmethod
     def get_order_dict(cls, order_id: int) -> dict:
-        order_string = CacheSingleton.get_cache().get(f"order:{order_id}")
+        order_string = get_cache().get(f"order:{order_id}")
 
         if order_string:
             order_dict = json.loads(order_string)
@@ -370,9 +379,7 @@ class OrderService(object):
 
         OrderCreditCard.insert({"order_id": order.id, **credit_card_data}).execute()
 
-        QueueSingleton.get_queue().enqueue(
-            cls._execute_transaction, order, credit_card_data
-        )
+        get_queue().enqueue(cls._execute_transaction, order, credit_card_data)
 
         return None
 
@@ -413,6 +420,4 @@ class OrderService(object):
                 }
             ).execute()
 
-        CacheSingleton.get_cache().set(
-            f"order:{order.id}", json.dumps(cls.order_to_dict(order))
-        )
+        get_cache().set(f"order:{order.id}", json.dumps(cls.order_to_dict(order)))

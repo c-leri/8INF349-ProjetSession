@@ -12,7 +12,7 @@ from api8inf349.services import OrderService
 
 
 class TestProduct(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         product = Product.create(
             id=1,
             name="Test",
@@ -43,7 +43,7 @@ class TestProduct(object):
 
 
 class TestOrder(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -63,7 +63,7 @@ class TestOrder(object):
         assert got_order.shipping_price == 5
         assert got_order.paid is True
 
-    def test_dict(self, app, db_transaction):
+    def test_dict(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -80,7 +80,7 @@ class TestOrder(object):
 
 
 class TestOrderProduct(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -114,7 +114,7 @@ class TestOrderProduct(object):
         assert got_order_product.product_id == 1
         assert got_order_product.quantity == 2
 
-    def test_dict(self, app, db_transaction):
+    def test_dict(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -143,7 +143,7 @@ class TestOrderProduct(object):
 
 
 class TestOrderShippingInformation(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -178,7 +178,7 @@ class TestOrderShippingInformation(object):
         assert got_order_shipping_information.city == "Chicoutimi"
         assert got_order_shipping_information.province == "QC"
 
-    def test_dict(self, app, db_transaction):
+    def test_dict(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -205,7 +205,7 @@ class TestOrderShippingInformation(object):
 
 
 class TestOrderCreditCard(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -238,7 +238,7 @@ class TestOrderCreditCard(object):
         assert got_order_credit_card.expiration_year == 2025
         assert got_order_credit_card.expiration_month == 5
 
-    def test_dict(self, app, db_transaction):
+    def test_dict(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -265,7 +265,7 @@ class TestOrderCreditCard(object):
 
 
 class TestOrderTransaction(object):
-    def test_create(self, app, db_transaction):
+    def test_create(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -289,7 +289,7 @@ class TestOrderTransaction(object):
         assert got_order_transaction.success is True
         assert got_order_transaction.amount_charged == 1048.4
 
-    def test_dict(self, app, db_transaction):
+    def test_dict(self, with_db_transaction):
         order = Order.create(
             email="test@example.com",
             total_price=1818.9,
@@ -309,7 +309,7 @@ class TestOrderTransaction(object):
 
 
 class TestOrderService(object):
-    def test_order_to_dict(self, app, db_transaction):
+    def test_order_to_dict(self, with_db_transaction):
         product = Product.create(
             id=1,
             name="Test",
@@ -399,13 +399,13 @@ class TestOrderService(object):
 
 
 class TestRoutes(object):
-    def test_empty_index(self, app, client, db_transaction):
+    def test_empty_index(self, client, with_db_transaction):
         response = client.get("/")
 
         assert response.status_code == 200
         assert response.json == {"products": []}
 
-    def test_index(self, app, client, db_transaction):
+    def test_index(self, client, with_db_transaction):
         product = Product.create(
             id=1,
             name="Test",
